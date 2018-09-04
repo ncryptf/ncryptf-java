@@ -1,4 +1,4 @@
-package ncryptf;
+package ncryptf.exceptions;
 
 public class KeyDerivationException extends Exception
 {

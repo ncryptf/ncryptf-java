@@ -6,13 +6,16 @@ import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.Random;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import com.goterl.lazycode.lazysodium.LazySodiumJava;
+import com.goterl.lazycode.lazysodium.SodiumJava;
+
 import at.favre.lib.crypto.HKDF;
+import ncryptf.exceptions.KeyDerivationException;
 
 public class Authorization
 {
@@ -24,6 +27,7 @@ public class Authorization
     private String signature;
     private byte[] hmac;
     private int version = 2;
+    private LazySodiumJava sodium;
 
     /**
      * Constructor
@@ -70,10 +74,10 @@ public class Authorization
      */
     public Authorization(String httpMethod, String uri, Token token, ZonedDateTime date, String payload, int version, byte[] salt) throws KeyDerivationException
     {
+        this.sodium = new LazySodiumJava(new SodiumJava());
         httpMethod = httpMethod.toUpperCase();
         if (salt == null) {
-            salt = new byte[32];
-            new Random().nextBytes(salt);
+            salt = sodium.randomBytesBuf(32);
         }
 
         this.salt = salt;
