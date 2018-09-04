@@ -40,7 +40,7 @@ public class Response
     public String decrypt(byte[] response, byte[] nonce) throws DecryptionException
     {
         try {
-            Box.Native box = (Box.Native) sodium;
+            Box.Native box = (Box.Native) this.sodium;
             byte[] message = new byte[response.length - Box.MACBYTES];
 
             boolean result = box.cryptoBoxOpenEasy(
@@ -74,7 +74,7 @@ public class Response
     public boolean isSignatureValid(String response, byte[] signature, byte[] publicKey) throws SignatureVerificationException
     {
         try {
-            Sign.Native sign = (Sign.Native) sodium;
+            Sign.Native sign = (Sign.Native) this.sodium;
             byte[] message = response.getBytes("UTF-8");
 
             return sign.cryptoSignVerifyDetached(

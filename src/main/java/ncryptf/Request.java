@@ -39,7 +39,7 @@ public class Request
      */
     public byte[] encrypt(String data) throws EncryptionException
     {
-        byte[] nonce = sodium.randomBytesBuf(Box.NONCEBYTES);
+        byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
         return encrypt(data, nonce);
     }
 
@@ -54,7 +54,7 @@ public class Request
     public byte[] encrypt(String data, byte[] nonce) throws EncryptionException
     {
         try {
-            Box.Native box = (Box.Native) sodium;
+            Box.Native box = (Box.Native) this.sodium;
             byte[] message = data.getBytes("UTF-8");
             byte[] cipher = new byte[Box.MACBYTES + message.length];
 
@@ -89,7 +89,7 @@ public class Request
         try {
             byte[] message = data.getBytes("UTF-8");
             byte[] signature = new byte[Sign.BYTES];
-            Sign.Native sign = (Sign.Native) sodium;
+            Sign.Native sign = (Sign.Native) this.sodium;
 
             boolean result = sign.cryptoSignDetached(
                 signature,
