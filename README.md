@@ -8,7 +8,45 @@ A library for facilitating hashed based KDF signature authentication, and end-to
 
 ## Installing
 
-This library can be installed through Maven by added the following dependency.
+This library can be installed via Maven or Gradle via a JitPack checkout:
+
+### Maven
+
+1. Add `jitpack.io` as a repository dependency in your `pom.xml`.
+```xml
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
+```
+
+2. Add this repository as a dependency. Be sure to replace `LATEST_TAG_FROM_GITHUB` appropriately.
+```xml
+<dependency>
+    <groupId>com.github.charlesportwoodii</groupId>
+    <artifactId>ncryptf-java</artifactId>
+    <version>LATEST_TAG_FROM_GITHUB</version>
+</dependency>
+```
+
+### Gradle
+
+1. Add `jitpack.io` to your root `bundle.gradle` file:
+```json
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+2. Add this repository as a dependency. Be sure to replace `LATEST_TAG_FROM_GITHUB` appropriately.
+```json
+dependencies {
+    implementation 'com.github.charlesportwoodii:ncryptf-java:LATEST_TAG_FROM_GITHUB'
+}
+```
 
 ## Testing
 
