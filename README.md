@@ -1,5 +1,8 @@
 # ncryptf Java
 
+[![TravisCI](https://img.shields.io/travis/charlesportwoodii/ncryptf-java.svg?style=flat-square "TravisCI")](https://travis-ci.org/charlesportwoodii/ncryptf-java)
+[![License](https://img.shields.io/badge/license-BSD-orange.svg?style=flat-square "License")](https://github.com/charlesportwoodii/ncryptf-php/blob/master/LICENSE.md)
+
 <center>
     <img src="https://github.com/charlesportwoodii/ncryptf-java/blob/master/logo.png?raw=true" alt="ncryptf logo" width="400px"/>
 </center>
