@@ -9,4 +9,6 @@ jdk:
   - openjdk11
   - openjdk-ea
   - oraclejdk8
+  - oraclejdk9
   - oraclejdk10
+  - oraclejdk11
