@@ -14,9 +14,20 @@ import ncryptf.exceptions.SigningException;
 
 public class Request
 {
+    /**
+     * KeyPair for the reuqest
+     */
     private KeyPair keyPair;
-    private byte[] nonce;
+
+    /**
+     * Libsodium implementation
+     */
     private LazySodiumJava sodium;
+
+    /**
+     * 24 byte nonce used for the request
+     */
+    private byte[] nonce;
 
     /**
      * Constructor 

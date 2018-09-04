@@ -14,7 +14,14 @@ import ncryptf.exceptions.SignatureVerificationException;
 
 public class Response
 {
+    /**
+     * KeyPair for the reuqest
+     */
     private KeyPair keyPair;
+
+    /**
+     * Libsodium implementation
+     */
     private LazySodiumJava sodium;
 
     /**

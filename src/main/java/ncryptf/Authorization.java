@@ -19,14 +19,44 @@ import ncryptf.exceptions.KeyDerivationException;
 
 public class Authorization
 {
+    /**
+     * Default AUTH_INFO
+     */
     public static final String AUTH_INFO = "HMAC|AuthenticationKey";
 
+    /**
+     * Token
+     */
     private Token token;
+
+    /**
+     * 32 byte salt
+     */
     private byte[] salt;
+
+    /**
+     * ZonedDateTime
+     */
     private ZonedDateTime date;
+
+    /**
+     * Generated signature string
+     */
     private String signature;
+
+    /**
+     * Generated HMAC
+     */
     private byte[] hmac;
+
+    /**
+     * The default version to use for auth & signautres
+     */
     private int version = 2;
+    
+    /**
+     * Libsodium implementation
+     */
     private LazySodiumJava sodium;
 
     /**
