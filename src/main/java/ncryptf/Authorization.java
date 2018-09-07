@@ -107,7 +107,7 @@ public class Authorization
         this.sodium = new LazySodiumJava(new SodiumJava());
         httpMethod = httpMethod.toUpperCase();
         if (salt == null) {
-            salt = sodium.randomBytesBuf(32);
+            salt = this.sodium.randomBytesBuf(32);
         }
 
         this.salt = salt;

@@ -203,18 +203,9 @@ To encrypt, decrypt, sign, and verify messages, you'll need to be able to genera
 Encryption uses a sodium crypto box. A keypair can be generated as follows when using `lazy-sodium`.
 
 ```java
-import com.goterl.lazycode.lazysodium.LazySodiumJava;
-import com.goterl.lazycode.lazysodium.SodiumJava;
-import com.goterl.lazycode.lazysodium.utils.KeyPair;
-import com.goterl.lazycode.lazysodium.interfaces.Box;
-
-LazySodium sodium = new LazySodiumJava(new SodiumJava());
-
-Box.Lazy box = (Box.Lazy) sodium;
-KeyPair kp = box.cryptoBoxKeypair();
-
-byte[] publicKey = kp.getPublicKey().getAsBytes();
-byte[] secretKey = kp.getSecretKey().getAsBytes();
+import ncryptf.Utils;
+import ncryptf.Keypair;
+Keypair kp = Utils.generateKeypair();
 ```
 
 #### Signing Keys
@@ -222,18 +213,9 @@ byte[] secretKey = kp.getSecretKey().getAsBytes();
 Encryption uses a sodium signature. A keypair for signing can be generated as follows using `lazy-sodium`:
 
 ```java
-import com.goterl.lazycode.lazysodium.LazySodiumJava;
-import com.goterl.lazycode.lazysodium.SodiumJava;
-import com.goterl.lazycode.lazysodium.utils.KeyPair;
-import com.goterl.lazycode.lazysodium.interfaces.Box;
-
-LazySodium sodium = new LazySodiumJava(new SodiumJava());
-
-Sign.Lazy sign = (Sign.Lazy) sodium;
-KeyPair kp = sign.cryptoSignKeypair()
-
-byte[] publicKey = kp.getPublicKey().getAsBytes();
-byte[] secretKey = kp.getSecretKey().getAsBytes();
+import ncryptf.Utils;
+import ncryptf.Keypair;
+Keypair kp = Utils.generateSigningKeypair();
 ```
 
 ### Encrypted Request Body
