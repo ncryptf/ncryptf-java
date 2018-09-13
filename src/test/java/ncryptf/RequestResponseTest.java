@@ -9,10 +9,7 @@ import java.util.Base64;
 
 import org.junit.jupiter.api.Test;
 
-import ncryptf.exceptions.DecryptionException;
-import ncryptf.exceptions.EncryptionException;
-import ncryptf.exceptions.SignatureVerificationException;
-import ncryptf.exceptions.SigningException;
+import ncryptf.exceptions.*;
 
 public class RequestResponseTest
 {
@@ -30,6 +27,8 @@ public class RequestResponseTest
     private byte[] expectedCipher = Base64.getDecoder().decode("1odrjBif71zRcZidfhEzSb80rXGJGB1J3upTb+TwhpxmFjXOXjwSDw45e7p/+FW4Y0/FDuLjHfGghOG0UC7j4xmX8qIVYUdbKCB/dLn34HQ0D0NIM6N9Qj83bpS5XgK1o+luonc0WxqA3tdXTcgkd2D+cSSSotJ/s+5fqN3w5xsKc7rKb1p3MpvRzyEmdNgJCFOk8EErn0bolz9LKyPEO0A2Mnkzr19bDwsgD1DGEYlo0i9KOw06RpaZRz2J+OJ+EveIlQGDdLT8Gh+nv65TOKJqCswOly0=");
     private byte[] expectedSignature = Base64.getDecoder().decode("dcvJclMxEx7pcW/jeVm0mFHGxVksY6h0/vNkZTfVf+wftofnP+yDFdrNs5TtZ+FQ0KEOm6mm9XUMXavLaU9yDg==");
 
+    private byte[] expectedv2Cipher = Base64.getDecoder().decode("3iWQAm7pUZyrfwb8J8IgjAS73UTOfsjRT9/FLTo569CkMuhiesfnkGvsDcHR3o2aPL2OVTcmWOTX8AY11odrjBif71zRcZidfhEzSb80rXGJGB1J3upTb+TwhpxmFjXOXjwSDw45e7p/+FW4Y0/FDuLjHfGghOG0UC7j4xmX8qIVYUdbKCB/dLn34HQ0D0NIM6N9Qj83bpS5XgK1o+luonc0WxqA3tdXTcgkd2D+cSSSotJ/s+5fqN3w5xsKc7rKb1p3MpvRzyEmdNgJCFOk8EErn0bolz9LKyPEO0A2Mnkzr19bDwsgD1DGEYlo0i9KOw06RpaZRz2J+OJ+EveIlQGDdLT8Gh+nv65TOKJqCswOly0i42NKK/654zGtxTSOcNHPEwtFAz0A4k0hwlIFopZEsXXLyXJTMRMe6XFv43lZtJhRxsVZLGOodP7zZGU31X/sH7aH5z/sgxXazbOU7WfhUNChDpuppvV1DF2ry2lPcg4SwqYwa53inoY2+eCPP4Hkp/PKhSOEMFlWV+dlQirn6GGf5RQSsQ7ti/QCvi/BRIhb3ZHiPptZJZIbYwqIpvYu");
+
     private String payload = "{\n" +
     "    \"foo\": \"bar\",\n" +
     "    \"test\": {\n" +
@@ -45,27 +44,53 @@ public class RequestResponseTest
     "}";
 
     @Test
-    void testEncryptDecrypt()
+    void testv2EncryptDecrypt()
     {
         try {
             Request request = new Request(
                 clientKeyPairSecret,
                 serverKeyPairPublic
             );
-            byte[] cipher = request.encrypt(payload, nonce);
-            byte[] signature = request.sign(payload, signatureKeyPairSecret);
+
+            byte[] cipher = request.encrypt(this.payload, this.signatureKeyPairSecret, 2, this.nonce);
+
+            String eCipher = DatatypeConverter.printHexBinary(this.expectedv2Cipher);
+            String aCipher = DatatypeConverter.printHexBinary(cipher);
+            assertEquals(eCipher, aCipher);
 
             Response response = new Response(
-                serverKeyPairSecret,
-                clientKeyPairPublic
+                serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher, nonce);
+            String decrypted = response.decrypt(cipher);
+            assertEquals(payload, decrypted);
+        } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
+            fail(e);
+        }
+    }
 
-            String eCipher = DatatypeConverter.printHexBinary(expectedCipher);
+    @Test
+    void testv1EncryptDecrypt()
+    {
+        try {
+            Request request = new Request(
+                clientKeyPairSecret,
+                serverKeyPairPublic
+            );
+            byte[] cipher = request.encrypt(this.payload, null, 1, this.nonce);
+            byte[] signature = request.sign(this.payload, this.signatureKeyPairSecret);
+
+            Response response = new Response(
+                this.serverKeyPairSecret,
+                this.clientKeyPairPublic
+            );
+
+            String decrypted = response.decrypt(cipher, this.nonce);
+
+            String eCipher = DatatypeConverter.printHexBinary(this.expectedCipher);
             String aCipher = DatatypeConverter.printHexBinary(cipher);
 
-            String eSignature = DatatypeConverter.printHexBinary(expectedSignature);
+            String eSignature = DatatypeConverter.printHexBinary(this.expectedSignature);
             String aSignature = DatatypeConverter.printHexBinary(signature);
             assertEquals(eCipher, aCipher);
             assertEquals(eSignature, aSignature);
@@ -74,11 +99,11 @@ public class RequestResponseTest
             boolean isSignatureValid = response.isSignatureValid(
                 decrypted,
                 signature,
-                signatureKeyPairPublic
+                this.signatureKeyPairPublic
             );
 
             assertTrue(isSignatureValid);
-        } catch (EncryptionException | DecryptionException | SigningException | SignatureVerificationException e) {
+        } catch (EncryptionFailedException | DecryptionFailedException | SigningException | SignatureVerificationException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
         }
     }

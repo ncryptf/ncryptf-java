@@ -235,17 +235,15 @@ try {
     Request request = new Request(secretKeyBytes, publicKeyBytes);
 
     // Cipher now contains the encryted data
-    byte[] cipher = request.encrypt(payload);
-    byte[] nonce = request.getNonce();
+    // Signature should be the signature private key previously agreed upon with the sender
+    // If you're using a `Token` object, this should be the `.signature` property
+    byte[] cipher = request.encrypt(payload, token.signature);
 
     // Send as encrypted request body
     String b64Body = Base64.getEncoder().encode(cipher);
 
-    // Send as X-Nonce header
-    String b64Nonce = Base64.getEncoder().encode(nonce);
-
     // Do your http request here
-} catch (EncryptionException e) {
+} catch (EncryptionFailedException e) {
     // Handle encryption errors here
 }
 ```
@@ -258,35 +256,37 @@ Responses from the server can be decrypted as follows:
 
 ```java
 import ncryptf.Response;
-import ncryptf.exceptions;
+import ncryptf.exceptions.*;
 import org.apache.commons.codec.binary.Base64;
 
 try {
     // Grab the raw response from the server
     byte[] responseFromServer = Base64.decodeBase64("<HTTP-Response-Body>");
     byte[] xnonce = Base64.decodeBase64("<X-Nonce-Header>");
-    Response response = new Response(
-        clientSecretKey,
-        serverPublicKey
-    );
+    Response response = new Response(clientSecretKey);
 
-    String decrypted = response.decrypt(responseFromServer, xnonce);
-
-    // For additional integrity checking, verify the detached signature
-    try {
-        boolean isSignatureValid = response.isSignatureValid(
-            decrypted,
-            xSignatureHeaderAsBytes,
-            xSignaturePubHeaderAsBytes
-        );
-
-        if (isSignatureValid) {
-            // Handle http response
-        }
-    } catch (SignatureVerificationException e) {
-        // Signature verification failed, request was modified in transit
-    }
-} catch (DecryptionException e) {
-    // Handle decryption errors, usually means the request was modified in transit
+    String decrypted = response.decrypt(responseFromServer);
+} catch (InvalidChecksumException e) {
+    // Checksum is not valid. Request body was tampered with
+} catch (InvalidSignatureException e) {
+    // Signature verification failed
+} catch (DecryptionFailedException e) {
+    // Decryption failed. This may be an issue with the provided nonce, or keypair being used
 }
 ```
+
+### V2 Encrypted Payload
+
+Verison 2 works identical to the version 1 payload, with the exception that all components needed to decrypt the message are bundled within the payload itself, rather than broken out into separate headers. This alleviates developer concerns with needing to manage multiple headers.
+
+The version 2 payload is described as follows. Each component is concatanated together.
+
+| Segment | Length |
+|---------|--------|
+| 4 byte header `DE259002` in binary format | 4 BYTES |
+| Nonce | 24 BYTES |
+| The public key associated to the private key | 32 BYTES |
+| Encrypted Body | X BYTES |
+| Signature Public Key | 32 BYTES |
+| Signature or raw request body | 64 BYTES |
+| Checksum of prior elements concatonated together | 64 bytes |

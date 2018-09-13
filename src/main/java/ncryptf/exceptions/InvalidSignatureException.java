@@ -1,6 +1,6 @@
 package ncryptf.exceptions;
 
-public class DecryptionException extends Exception
+public class InvalidSignatureException extends Exception
 {
     private static final long serialVersionUID = 3L;
 }

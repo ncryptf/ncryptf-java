@@ -1,15 +1,19 @@
 package ncryptf;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
+import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
-import com.goterl.lazycode.lazysodium.utils.Key;
-import com.goterl.lazycode.lazysodium.utils.KeyPair;
 
-import ncryptf.exceptions.DecryptionException;
+import ncryptf.exceptions.DecryptionFailedException;
+import ncryptf.exceptions.InvalidChecksumException;
+import ncryptf.exceptions.InvalidSignatureException;
 import ncryptf.exceptions.SignatureVerificationException;
 
 public class Response
@@ -17,7 +21,12 @@ public class Response
     /**
      * KeyPair for the reuqest
      */
-    private KeyPair keyPair;
+    private Keypair keypair;
+
+    /**
+     * Secret key bytes
+     */
+    private byte[] secretKey;
 
     /**
      * Libsodium implementation
@@ -28,23 +37,94 @@ public class Response
      * Constructor 
      * 
      * @param secretKey 32 byte secret key
+     */
+    public Response(byte[] secretKey)
+    {
+        this.sodium = new LazySodiumJava(new SodiumJava());
+        this.secretKey = secretKey;
+    }
+    /**
+     * Constructor 
+     * 
+     * @param secretKey 32 byte secret key
      * @param publicKey 32 byte public key
      */
     public Response(byte[] secretKey, byte[] publicKey)
     {
         this.sodium = new LazySodiumJava(new SodiumJava());
-        this.keyPair = new KeyPair(Key.fromBytes(publicKey), Key.fromBytes(secretKey));
+        this.keypair = new Keypair(secretKey, publicKey);
     }
 
+    /**
+     * Decrypts a v2 encrypted body
+     * 
+     * @param response
+     * @return Decrypted response as a String
+     * @throws DecryptionFailedException
+     */
+    public String decrypt(byte[] response) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
+    {
+        byte[] nonce = Arrays.copyOfRange(response, 4, 28);
+        return this.decrypt(response, nonce);
+    }
+
+    /**
+     * Decrypts a v1 or a v2 encrypted body
+     * @param response
+     * @param nonce
+     * @return Decrypted response as a string
+     * @throws DecryptionFailedException
+     */
+    public String decrypt(byte[] response, byte[] nonce) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
+    {
+        int version = this.getVersion(response);
+        if (version == 2) {
+            byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
+            byte[] checksum = Arrays.copyOfRange(response, response.length - 64, response.length);
+            GenericHash.Native gh = (GenericHash.Native) this.sodium;
+
+            byte[] calculatedChecksum = new byte[64];
+            if (!gh.cryptoGenericHash(calculatedChecksum, 64, payload, payload.length, nonce, nonce.length)) {
+                throw new DecryptionFailedException();
+            }
+
+            // If the checksum is invalid, throw an exception
+            if (!Arrays.equals(checksum, calculatedChecksum)) {
+                throw new InvalidChecksumException();
+            }
+
+            byte[] publicKey = Arrays.copyOfRange(response, 28, 60);
+            byte[] signature = Arrays.copyOfRange(payload, payload.length - 64, payload.length);
+            byte[] sigPubKey = Arrays.copyOfRange(payload, payload.length - 96, payload.length - 64);
+            byte[] body = Arrays.copyOfRange(payload, 60, payload.length - 96);
+
+            this.keypair = new Keypair(this.secretKey, publicKey);
+
+            String decryptedPayload = this.decryptBody(body, nonce);
+
+            try {
+                if (!this.isSignatureValid(decryptedPayload, signature, sigPubKey)) {
+                    throw new InvalidSignatureException();
+                }
+            } catch (SignatureVerificationException e) {
+                throw new InvalidSignatureException();
+            }
+
+            return decryptedPayload;
+        }
+
+        return this.decryptBody(response, nonce);
+    }
+    
     /**
      * Decrypts the raw response
      * 
      * @param response  Raw byte array response from the server
      * @param nonce     24 byte nonce sent by the server
      * @return          Returns the decrypted payload as a string
-     * @throws DecryptionException
+     * @throws DecryptionFailedException
      */
-    public String decrypt(byte[] response, byte[] nonce) throws DecryptionException
+    private String decryptBody(byte[] response, byte[] nonce) throws DecryptionFailedException
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
@@ -55,15 +135,15 @@ public class Response
                 response,
                 response.length,
                 nonce,
-                this.keyPair.getPublicKey().getAsBytes(),
-                this.keyPair.getSecretKey().getAsBytes()
+                this.keypair.getPublicKey(),
+                this.keypair.getSecretKey()
             );
 
             if (result) {
                 return new String(message, "UTF-8");
             }
         } catch (UnsupportedEncodingException e) {
-            throw new DecryptionException();
+            throw new DecryptionFailedException();
         }
 
         return null;
@@ -93,5 +173,23 @@ public class Response
         } catch (UnsupportedEncodingException e) {
             throw new SignatureVerificationException();
         }
+    }
+
+    /**
+     * Returns the version from the response
+     * 
+     * @param response
+     * @return int
+     */
+    private int getVersion(byte[] response)
+    {
+        byte[] header = Arrays.copyOfRange(response, 0, 4);
+        String hex = DatatypeConverter.printHexBinary(header).toUpperCase();
+
+        if (hex.equals("DE259002")) {
+            return 2;
+        }
+
+        return 1;
     }
 }
