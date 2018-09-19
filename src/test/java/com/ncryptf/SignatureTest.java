@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

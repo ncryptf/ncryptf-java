@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
 
-import ncryptf.exceptions.EncryptionFailedException;
-import ncryptf.exceptions.SigningException;
+import com.ncryptf.exceptions.EncryptionFailedException;
+import com.ncryptf.exceptions.SigningException;
 
 public class Request
 {

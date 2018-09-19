@@ -1,4 +1,4 @@
-package ncryptf.exceptions;
+package com.ncryptf.exceptions;
 
 public class InvalidSignatureException extends Exception
 {

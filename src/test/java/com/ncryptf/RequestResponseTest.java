@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,7 +9,7 @@ import java.util.Base64;
 
 import org.junit.jupiter.api.Test;
 
-import ncryptf.exceptions.*;
+import com.ncryptf.exceptions.*;
 
 public class RequestResponseTest
 {

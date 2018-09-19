@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

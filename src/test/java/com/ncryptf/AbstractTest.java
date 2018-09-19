@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import java.time.Instant;
 import java.time.ZoneOffset;

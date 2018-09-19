@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -11,10 +11,10 @@ import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
 
-import ncryptf.exceptions.DecryptionFailedException;
-import ncryptf.exceptions.InvalidChecksumException;
-import ncryptf.exceptions.InvalidSignatureException;
-import ncryptf.exceptions.SignatureVerificationException;
+import com.ncryptf.exceptions.DecryptionFailedException;
+import com.ncryptf.exceptions.InvalidChecksumException;
+import com.ncryptf.exceptions.InvalidSignatureException;
+import com.ncryptf.exceptions.SignatureVerificationException;
 
 public class Response
 {

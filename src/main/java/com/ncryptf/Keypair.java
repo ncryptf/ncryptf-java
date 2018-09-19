@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 public class Keypair
 {

@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,8 +7,8 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 
 import org.junit.jupiter.api.Test;
 
-import ncryptf.Utils;
-import ncryptf.Keypair;
+import com.ncryptf.Utils;
+import com.ncryptf.Keypair;
 
 public class UtilsTest
 {

@@ -1,11 +1,11 @@
-package ncryptf;
+package com.ncryptf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-import ncryptf.exceptions.KeyDerivationException;
+import com.ncryptf.exceptions.KeyDerivationException;
 
 public class AuthorizationTest extends AbstractTest
 {

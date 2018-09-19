@@ -81,9 +81,9 @@ Supporting API's will return the following payload containing at minimum the fol
 After extracting the elements, we can create signed request by doing the following:
 
 ```java
-import ncryptf.Token;
-import ncryptf.Authorization;
-import ncryptf.exceptions.*;
+import com.ncryptfToken;
+import com.ncryptfAuthorization;
+import com.ncryptfexceptions.*;
 
 Token token = new Token(
     accessToken,
@@ -111,9 +111,9 @@ try {
 A trivial full example is shown as follows:
 
 ```java
-import ncryptf.Token;
-import ncryptf.Authorization;
-import ncryptf.exceptions.*;
+import com.ncryptfToken;
+import com.ncryptfAuthorization;
+import com.ncryptfexceptions.*;
 import org.apache.commons.codec.binary.Base64;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -203,8 +203,8 @@ To encrypt, decrypt, sign, and verify messages, you'll need to be able to genera
 Encryption uses a sodium crypto box. A keypair can be generated as follows when using `lazy-sodium`.
 
 ```java
-import ncryptf.Utils;
-import ncryptf.Keypair;
+import com.ncryptfUtils;
+import com.ncryptfKeypair;
 Keypair kp = Utils.generateKeypair();
 ```
 
@@ -213,8 +213,8 @@ Keypair kp = Utils.generateKeypair();
 Encryption uses a sodium signature. A keypair for signing can be generated as follows using `lazy-sodium`:
 
 ```java
-import ncryptf.Utils;
-import ncryptf.Keypair;
+import com.ncryptfUtils;
+import com.ncryptfKeypair;
 Keypair kp = Utils.generateSigningKeypair();
 ```
 
@@ -223,8 +223,8 @@ Keypair kp = Utils.generateSigningKeypair();
 Payloads can be encrypted as follows:
 
 ```java
-import ncryptf.Request;
-import ncryptf.exceptions.*;
+import com.ncryptfRequest;
+import com.ncryptfexceptions.*;
 import org.apache.commons.codec.binary.Base64;
 
 // Arbitrary string payload
@@ -255,8 +255,8 @@ try {
 Responses from the server can be decrypted as follows:
 
 ```java
-import ncryptf.Response;
-import ncryptf.exceptions.*;
+import com.ncryptfResponse;
+import com.ncryptfexceptions.*;
 import org.apache.commons.codec.binary.Base64;
 
 try {

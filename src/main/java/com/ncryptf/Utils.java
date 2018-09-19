@@ -1,4 +1,4 @@
-package ncryptf;
+package com.ncryptf;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
