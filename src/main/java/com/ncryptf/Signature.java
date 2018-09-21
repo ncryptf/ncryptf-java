@@ -73,7 +73,6 @@ public class Signature
      */
     private static String getSignatureHash(String data, byte[] salt, int version)
     {
-        String hash;
         if (version == 2) {
             LazySodiumJava sodium = new LazySodiumJava(new SodiumJava());
             GenericHash.Native gh = (GenericHash.Native) sodium;
@@ -88,11 +87,9 @@ public class Signature
                 salt.length
             );
 
-            hash = new String(Base64.getEncoder().encode(h));
-        } else {
-            hash = DigestUtils.sha256Hex(data).toLowerCase();
+            return new String(Base64.getEncoder().encode(h));
         }
-
-        return hash;
+        
+        return DigestUtils.sha256Hex(data).toLowerCase();
     }
 }
