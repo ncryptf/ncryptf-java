@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -83,12 +83,12 @@ abstract class AbstractTest
     {
         Instant i = Instant.ofEpochSecond(1533310068);
         this.date = ZonedDateTime.ofInstant(i, ZoneOffset.UTC);
-        this.salt = Base64.decodeBase64("efEY/IJdAbi474TtQCCjj2y1FGB4BFFPpbHm/1QtpyI=");
+        this.salt = Base64.getDecoder().decode("efEY/IJdAbi474TtQCCjj2y1FGB4BFFPpbHm/1QtpyI=");
         this.token = new Token(
             "x2gMeJ5Np0CcKpZav+i9iiXeQBtaYMQ/yeEtcOgY3J",
             "LRSEe5zHb1aq20Hr9te2sQF8sLReSkO8bS1eD/9LDM8",
-            Base64.decodeBase64("f2mTaH9vkZZQyF7SxVeXDlOSDbVwjUzhdXv2T/YYO8k="),
-            Base64.decodeBase64("waWBMawHD1zpAFRcX7e45L1aqsA3mEeSOwXqq4l1i3I="),
+            Base64.getDecoder().decode("f2mTaH9vkZZQyF7SxVeXDlOSDbVwjUzhdXv2T/YYO8k="),
+            Base64.getDecoder().decode("waWBMawHD1zpAFRcX7e45L1aqsA3mEeSOwXqq4l1i3I="),
             ZonedDateTime.now(ZoneOffset.UTC).plusHours(4).toEpochSecond()
         );
     }
