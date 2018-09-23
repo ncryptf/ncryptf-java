@@ -29,7 +29,7 @@ public class Utils
 
     /**
      * Returns a crypto box keypair (32 byte secret, 32 byte public)
-     * @return ncryptf.Keypair
+     * @return com.ncryptf.Keypair
      */
     public static Keypair generateKeypair()
     {
@@ -50,7 +50,7 @@ public class Utils
 
     /**
      * Returns a crypto sign keypair (64 byte secret, 32 byte public)
-     * @return ncryptf.Keypair
+     * @return com.ncryptf.Keypair
      */
     public static Keypair generateSigningKeypair()
     {

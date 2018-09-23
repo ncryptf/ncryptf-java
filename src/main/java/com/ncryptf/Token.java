@@ -49,7 +49,7 @@ public class Token
     }
 
     /**
-     * @return Returns `true` is fht ecurent token is expired and should be refreshed
+     * @return Returns `true` if the ecurent token is expired and should be refreshed
      */
     public Boolean isExpired()
     {
