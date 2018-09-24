@@ -9,11 +9,12 @@ import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.ncryptf.exceptions.KeyDerivationException;
+
+import org.apache.commons.codec.binary.Hex;
 
 import at.favre.lib.crypto.HKDF;
 
@@ -123,7 +124,7 @@ public class Authorization
         );        
         
         try {
-            String hkdfString = DatatypeConverter.printHexBinary(hkdf);
+            String hkdfString = new String(Hex.encodeHex(hkdf));
             byte[] key = (hkdfString).toLowerCase().getBytes("UTF-8");
             byte[] sig = (this.signature).getBytes("UTF-8");
 

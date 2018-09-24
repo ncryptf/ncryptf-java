@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
@@ -13,6 +11,9 @@ import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
 import com.ncryptf.exceptions.EncryptionFailedException;
 import com.ncryptf.exceptions.SigningException;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 public class Request
 {
@@ -72,7 +73,7 @@ public class Request
     public byte[] encrypt(String data, byte[] signatureKey, int version) throws EncryptionFailedException
     {
         byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
-        return encrypt(data, signatureKey, version, nonce);
+        return this.encrypt(data, signatureKey, version, nonce);
     }
 
     /**
@@ -88,28 +89,32 @@ public class Request
     public byte[] encrypt(String data, byte[] signatureKey, int version, byte[] nonce) throws EncryptionFailedException
     {
         if (version == 2) {
-            byte[] header = DatatypeConverter.parseHexBinary("DE259002");
-            byte[] body = this.encryptBody(data, nonce);
-            
-            if (body == null) {
-                throw new EncryptionFailedException();
-            }
-
-            byte[] publicKey = new byte[32];
-            if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.keypair.getSecretKey()) != 0) {
-                throw new EncryptionFailedException();
-            }
-
-            byte[] sigPubKey = new byte[32];
-            if (this.sodium.getSodium().crypto_sign_ed25519_sk_to_pk(sigPubKey, signatureKey) != 0) {
-                throw new EncryptionFailedException();
-            }
-
             try {
+                if (signatureKey == null) {
+                    throw new EncryptionFailedException();
+                }
+                byte[] header = Hex.decodeHex("DE259002");
+                byte[] body = this.encryptBody(data, nonce);
+    
+                if (body == null) {
+                    throw new EncryptionFailedException();
+                }
+    
+                byte[] publicKey = new byte[32];
+                if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.keypair.getSecretKey()) != 0) {
+                    throw new EncryptionFailedException();
+                }
+    
+                byte[] sigPubKey = new byte[32];
+                if (this.sodium.getSodium().crypto_sign_ed25519_sk_to_pk(sigPubKey, signatureKey) != 0) {
+                    throw new EncryptionFailedException();
+                }
+
                 byte[] signature = this.sign(data, signatureKey);
                 if (signature == null) {
                     throw new EncryptionFailedException();
                 }
+                
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 stream.write(header);
                 stream.write(nonce);
@@ -129,12 +134,12 @@ public class Request
 
                 stream.write(checksum);
                 return stream.toByteArray();
-            } catch (SigningException | IOException e) {
+            } catch (SigningException | IOException | DecoderException e) {
                 throw new EncryptionFailedException();
             }
         }
 
-        return encryptBody(data, nonce);
+        return this.encryptBody(data, nonce);
     }
 
     /**

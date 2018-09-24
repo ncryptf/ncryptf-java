@@ -2,14 +2,22 @@ package com.ncryptf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import javax.xml.bind.DatatypeConverter;
+import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
-import org.junit.jupiter.api.Test;
+import com.ncryptf.exceptions.DecryptionFailedException;
+import com.ncryptf.exceptions.EncryptionFailedException;
+import com.ncryptf.exceptions.InvalidChecksumException;
+import com.ncryptf.exceptions.InvalidSignatureException;
+import com.ncryptf.exceptions.SignatureVerificationException;
+import com.ncryptf.exceptions.SigningException;
 
-import com.ncryptf.exceptions.*;
+import org.apache.commons.codec.binary.Hex;
+
+import org.junit.jupiter.api.Test;
 
 public class RequestResponseTest
 {
@@ -54,8 +62,8 @@ public class RequestResponseTest
 
             byte[] cipher = request.encrypt(this.payload, this.signatureKeyPairSecret, 2, this.nonce);
 
-            String eCipher = DatatypeConverter.printHexBinary(this.expectedv2Cipher);
-            String aCipher = DatatypeConverter.printHexBinary(cipher);
+            String eCipher = new String(Hex.encodeHex(this.expectedv2Cipher));
+            String aCipher = new String(Hex.encodeHex(cipher));
             assertEquals(eCipher, aCipher);
 
             Response response = new Response(
@@ -67,6 +75,57 @@ public class RequestResponseTest
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
         }
+    }
+
+    @Test
+    void testv2EncryptDecryptWithEmptyPayload()
+    {
+        try {
+            Request request = new Request(
+                clientKeyPairSecret,
+                serverKeyPairPublic
+            );
+
+            byte[] cipher = request.encrypt("", this.signatureKeyPairSecret, 2, this.nonce);
+
+            Response response = new Response(
+                serverKeyPairSecret
+            );
+
+            String decrypted = response.decrypt(cipher);
+            assertEquals("", decrypted);
+        } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void testv2DecryptWithSmallPayload()
+    {
+        assertThrows(DecryptionFailedException.class, () -> {
+            byte[] header = Hex.decodeHex("DE259002");
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            stream.write(header);
+            stream.write(new byte[231]);
+
+            Response response = new Response(
+                serverKeyPairSecret
+            );
+            response.decrypt(stream.toByteArray());
+        });
+    }
+
+    @Test
+    void testv1DecryptWithSmallPayload()
+    {
+        assertThrows(DecryptionFailedException.class, () -> {
+            byte[] cipher = new byte[15];
+
+            Response response = new Response(
+                serverKeyPairSecret
+            );
+            response.decrypt(cipher);
+        });
     }
 
     @Test
@@ -87,11 +146,12 @@ public class RequestResponseTest
 
             String decrypted = response.decrypt(cipher, this.nonce);
 
-            String eCipher = DatatypeConverter.printHexBinary(this.expectedCipher);
-            String aCipher = DatatypeConverter.printHexBinary(cipher);
+            String eCipher = new String(Hex.encodeHex(this.expectedCipher));
+            String aCipher = new String(Hex.encodeHex(cipher));
 
-            String eSignature = DatatypeConverter.printHexBinary(this.expectedSignature);
-            String aSignature = DatatypeConverter.printHexBinary(signature);
+            String eSignature = new String(Hex.encodeHex(this.expectedSignature));
+            String aSignature = new String(Hex.encodeHex(signature));
+            
             assertEquals(eCipher, aCipher);
             assertEquals(eSignature, aSignature);
             assertEquals(payload, decrypted);

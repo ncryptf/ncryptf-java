@@ -3,8 +3,6 @@ package com.ncryptf;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
@@ -15,6 +13,8 @@ import com.ncryptf.exceptions.DecryptionFailedException;
 import com.ncryptf.exceptions.InvalidChecksumException;
 import com.ncryptf.exceptions.InvalidSignatureException;
 import com.ncryptf.exceptions.SignatureVerificationException;
+
+import org.apache.commons.codec.binary.Hex;
 
 public class Response
 {
@@ -61,9 +61,14 @@ public class Response
      * @param response
      * @return Decrypted response as a String
      * @throws DecryptionFailedException
+     * @throws InvalidChecksumException
+     * @throws InvalidSignatureException
      */
     public String decrypt(byte[] response) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
+        if (response.length < 236) {
+            throw new DecryptionFailedException();
+        }
         byte[] nonce = Arrays.copyOfRange(response, 4, 28);
         return this.decrypt(response, nonce);
     }
@@ -74,11 +79,26 @@ public class Response
      * @param nonce
      * @return Decrypted response as a string
      * @throws DecryptionFailedException
+     * @throws InvalidChecksumException
+     * @throws InvalidSignatureException
      */
     public String decrypt(byte[] response, byte[] nonce) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
         int version = this.getVersion(response);
         if (version == 2) {
+            /**
+             * Payload should be a minimum of 236 bytes
+             * 4 byte header
+             * 24 byte nonce
+             * 32 byte public key
+             * 16 byte Box.MACBYTES
+             * 32 byte signature public key
+             * 64 byte signature
+             * 64 byte checksum
+             */
+            if (response.length < 236) {
+                throw new DecryptionFailedException();
+            }
             byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
             byte[] checksum = Arrays.copyOfRange(response, response.length - 64, response.length);
             GenericHash.Native gh = (GenericHash.Native) this.sodium;
@@ -128,6 +148,9 @@ public class Response
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
+            if (response.length < Box.MACBYTES) {
+                throw new DecryptionFailedException();
+            }
             byte[] message = new byte[response.length - Box.MACBYTES];
 
             boolean result = box.cryptoBoxOpenEasy(
@@ -181,10 +204,14 @@ public class Response
      * @param response
      * @return int
      */
-    private int getVersion(byte[] response)
+    private int getVersion(byte[] response) throws DecryptionFailedException
     {
+        if (response.length < 16) {
+            throw new DecryptionFailedException();
+        }
+
         byte[] header = Arrays.copyOfRange(response, 0, 4);
-        String hex = DatatypeConverter.printHexBinary(header).toUpperCase();
+        String hex = new String(Hex.encodeHex(header)).toUpperCase();
 
         if (hex.equals("DE259002")) {
             return 2;
