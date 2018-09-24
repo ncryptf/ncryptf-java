@@ -13,9 +13,9 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
+import com.ncryptf.exceptions.KeyDerivationException;
 
 import at.favre.lib.crypto.HKDF;
-import com.ncryptf.exceptions.KeyDerivationException;
 
 public class Authorization
 {

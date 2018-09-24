@@ -11,7 +11,6 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
-
 import com.ncryptf.exceptions.EncryptionFailedException;
 import com.ncryptf.exceptions.SigningException;
 
