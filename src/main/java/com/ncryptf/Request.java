@@ -90,6 +90,11 @@ public class Request
         if (version == 2) {
             byte[] header = DatatypeConverter.parseHexBinary("DE259002");
             byte[] body = this.encryptBody(data, nonce);
+            
+            if (body == null) {
+                throw new EncryptionFailedException();
+            }
+
             byte[] publicKey = new byte[32];
             if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.keypair.getSecretKey()) != 0) {
                 throw new EncryptionFailedException();
@@ -102,6 +107,9 @@ public class Request
 
             try {
                 byte[] signature = this.sign(data, signatureKey);
+                if (signature == null) {
+                    throw new EncryptionFailedException();
+                }
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 stream.write(header);
                 stream.write(nonce);
