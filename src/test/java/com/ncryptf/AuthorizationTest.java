@@ -91,7 +91,7 @@ public class AuthorizationTest extends AbstractTest
                     this.token,
                     ZonedDateTime.now(ZoneOffset.UTC),
                     test.payload,
-                    1,
+                    2,
                     this.salt
                 );
 
