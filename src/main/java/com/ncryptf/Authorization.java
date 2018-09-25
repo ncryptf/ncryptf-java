@@ -3,6 +3,7 @@ package com.ncryptf;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -18,7 +19,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import at.favre.lib.crypto.HKDF;
 
-public class Authorization
+final public class Authorization
 {
     /**
      * Default AUTH_INFO
@@ -208,5 +209,52 @@ public class Authorization
         }
 
         return "HMAC " + this.token.accessToken + "," + hmac + "," + salt;
+    }
+
+    /**
+     * Validates a provided HMAC against an auth object and a drift
+     *
+     * @param hmac 32 byte HMAC
+     * @param auth Authorization object generated from HTTP request
+     * @return boolean
+     */
+    public Boolean verify(byte[] hmac, Authorization auth)
+    {
+        return this.verify(hmac, auth, 90);
+    }
+
+    /**
+     * Validates a provided HMAC against an auth object and a drift
+     *
+     * @param hmac 32 byte HMAC
+     * @param auth Authorization object generated from HTTP request
+     * @param driftAllowance Number of seconds that the request may be permitted to drift bt
+     * @return boolean
+     */
+    public Boolean verify(byte[] hmac, Authorization auth, Integer driftAllowance)
+    {
+        Integer drift = this.getTimeDrift(auth.getDate());
+        if (drift >= driftAllowance) {
+            return false;
+        }
+
+        // Constant time byte comparison between the provided hmac and the authorization object
+        if (this.sodium.getSodium().sodium_memcmp(hmac, auth.getHMAC(), 32) == 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculates the time difference between now and the provided date
+     * @param date The date to compare against
+     * @return Integer
+     */
+    private Integer getTimeDrift(ZonedDateTime date)
+    {
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+
+        return (int)Math.abs(now.toEpochSecond() - date.toEpochSecond());
     }
 }

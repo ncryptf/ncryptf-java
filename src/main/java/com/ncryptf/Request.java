@@ -15,7 +15,7 @@ import com.ncryptf.exceptions.SigningException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
-public class Request
+final public class Request
 {
     /**
      * KeyPair for the reuqest

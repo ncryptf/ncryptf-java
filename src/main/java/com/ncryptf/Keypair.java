@@ -1,6 +1,6 @@
 package com.ncryptf;
 
-public class Keypair
+final public class Keypair
 {
     /**
      * Secret key bytes
@@ -14,8 +14,8 @@ public class Keypair
 
     /**
      * Constructor
-     * @param secretKey
-     * @param publicKey
+     * @param secretKey     Secret key bytes
+     * @param publicKey     Public key bytes
      */
     public Keypair(byte[] secretKey, byte[] publicKey)
     {

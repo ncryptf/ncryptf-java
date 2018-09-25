@@ -1,6 +1,6 @@
 package com.ncryptf.exceptions;
 
-public class KeyDerivationException extends Exception
+final public class KeyDerivationException extends Exception
 {
     private static final long serialVersionUID = 4L;
 }

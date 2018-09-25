@@ -11,7 +11,7 @@ import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
-public class Signature
+final public class Signature
 {
     /**
      * Constructs a new v2 signature

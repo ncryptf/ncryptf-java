@@ -1,6 +1,6 @@
 package com.ncryptf.exceptions;
 
-public class EncryptionFailedException extends Exception
+final public class EncryptionFailedException extends Exception
 {
     private static final long serialVersionUID = 2L;
 }

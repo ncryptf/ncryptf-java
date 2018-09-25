@@ -1,6 +1,6 @@
 package com.ncryptf.exceptions;
 
-public class InvalidChecksumException extends Exception
+final public class InvalidChecksumException extends Exception
 {
     private static final long serialVersionUID = 1L;
 }

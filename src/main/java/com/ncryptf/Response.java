@@ -58,7 +58,7 @@ public class Response
     /**
      * Decrypts a v2 encrypted body
      * 
-     * @param response
+     * @param response Byte data returned by the server
      * @return Decrypted response as a String
      * @throws DecryptionFailedException
      * @throws InvalidChecksumException
@@ -75,8 +75,8 @@ public class Response
 
     /**
      * Decrypts a v1 or a v2 encrypted body
-     * @param response
-     * @param nonce
+     * @param response Byte data returned by the server
+     * @param nonce 24 byte nonce
      * @return Decrypted response as a string
      * @throws DecryptionFailedException
      * @throws InvalidChecksumException

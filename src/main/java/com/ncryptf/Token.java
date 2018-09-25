@@ -3,7 +3,7 @@ package com.ncryptf;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class Token
+final public class Token
 {
     /**
      * The access token

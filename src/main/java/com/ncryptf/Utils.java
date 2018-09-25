@@ -6,11 +6,11 @@ import com.goterl.lazycode.lazysodium.exceptions.SodiumException;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
 
-public class Utils
+final public class Utils
 {
     /**
-     * Zeros memory at the given bytep[] range
-     * @param data
+     * Zeros memory at the given byte[] range
+     * @param data Byte data to zero
      * @return Returns true if memory could be securely zeroed
      */
     public static boolean zero(byte[] data)
