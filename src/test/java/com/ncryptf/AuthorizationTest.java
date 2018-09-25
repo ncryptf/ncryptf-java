@@ -95,7 +95,7 @@ public class AuthorizationTest extends AbstractTest
                     this.salt
                 );
 
-                assertEquals(true, auth2.verify(auth2.getHMAC(), auth, 90));
+                assertEquals(true, auth2.verify(auth2.getHMAC(), auth2, 90));
             } catch (KeyDerivationException e) {
                 fail(e);
             }
