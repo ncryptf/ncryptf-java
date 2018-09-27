@@ -26,7 +26,7 @@ This library can be installed via Maven or Gradle via a JitPack checkout:
 2. Add this repository as a dependency. Be sure to replace `LATEST_TAG_FROM_GITHUB` appropriately.
 ```xml
 <dependency>
-    <groupId>com.github.charlesportwoodii</groupId>
+    <groupId>>com.ncryptf</groupId>
     <artifactId>ncryptf-java</artifactId>
     <version>LATEST_TAG_FROM_GITHUB</version>
 </dependency>
