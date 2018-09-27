@@ -1,7 +1,8 @@
-
-
-apply plugin: 'java-library'
-apply plugin: 'maven'
+plugins {
+    id 'com.adarshr.test-logger' version '1.5.0'
+    id 'maven'
+    id 'java-library'
+}
 
 group = 'com.ncryptf'
 version = '0.2.0'
@@ -22,6 +23,18 @@ repositories {
 
 test {
     useJUnitPlatform()
+}
+
+testlogger {
+    theme 'mocha-parallel'
+    slowThreshold 1000
+    showStandardStreams true
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+    showPassed true
+    showSkipped true
+    showFailed true
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -60,11 +73,7 @@ dependencies {
     implementation group: 'com.goterl.lazycode', name: 'lazysodium-java', version:'3.3.0'
     implementation group: 'net.java.dev.jna', name: 'jna', version:'4.5.2'
     implementation group: 'org.json', name: 'json', version:'20180813'
-    testImplementation(
-            'org.junit.jupiter:junit-jupiter-api:5.1.0'
-    )
-    testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
-            'org.junit.vintage:junit-vintage-engine:5.1.0'
-    )
+
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.1.0')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.1.0', 'org.junit.vintage:junit-vintage-engine:5.1.0')
 }

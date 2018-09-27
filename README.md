@@ -1,7 +1,7 @@
 # ncryptf Java
 
 <!-- ![JitPack](https://img.shields.io/jitpack/v/ncryptf/ncryptf-java.svg?style=flat-square) -->
-[![TravisCI](https://img.shields.io/travis/ncryptf/ncryptf-java.svg?style=flat-square "TravisCI")](https://travis-ci.org/ncryptf/ncryptf-java)
+[![TravisCI](https://img.shields.io/travis/ncryptf/ncryptf-java.svg?style=flat-square "TravisCI")](https://travis-ci.com.//ncryptf/ncryptf-java)
 [![License](https://img.shields.io/badge/license-BSD-orange.svg?style=flat-square "License")](https://github.com/ncryptf/ncryptf-java/blob/master/LICENSE.md)
 
 
