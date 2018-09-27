@@ -1,0 +1,70 @@
+
+
+apply plugin: 'java-library'
+apply plugin: 'maven'
+
+group = 'com.ncryptf'
+version = '0.2.0'
+
+description = """ncryptf"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// To specify a license in the pom:
+install {
+  repositories.mavenInstaller {
+    pom.project {
+      licenses {
+        license {
+          name 'BSD 3-Clause'
+          url 'https://raw.githubusercontent.com/ncryptf/ncryptf-java/master/LICENSE'
+          distribution 'repo'
+        }
+      }
+    }
+  }
+}
+
+dependencies {
+    implementation group: 'at.favre.lib', name: 'hkdf', version:'1.0.0'
+    implementation group: 'commons-codec', name: 'commons-codec', version:'1.11'
+    implementation group: 'com.goterl.lazycode', name: 'lazysodium-java', version:'3.3.0'
+    implementation group: 'net.java.dev.jna', name: 'jna', version:'4.5.2'
+    implementation group: 'org.json', name: 'json', version:'20180813'
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+            'org.junit.vintage:junit-vintage-engine:5.1.0'
+    )
+}
