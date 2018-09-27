@@ -1,5 +1,4 @@
 sudo: false
-dist: trusty
 language: java
 
 jdk:
@@ -15,3 +14,14 @@ jdk:
 
 matrix:
   fast_finish: true
+
+stages:
+  - compile
+  - test
+
+job:
+  include:
+    - stage: compile
+      script: mvn clean install -DskipTests
+    - stage: test
+      script: mvn test
