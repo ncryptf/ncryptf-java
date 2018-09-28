@@ -228,7 +228,7 @@ final public class Authorization
      *
      * @param hmac 32 byte HMAC
      * @param auth Authorization object generated from HTTP request
-     * @param driftAllowance Number of seconds that the request may be permitted to drift bt
+     * @param driftAllowance Number of seconds that the request may be permitted to drift by
      * @return boolean
      */
     public Boolean verify(byte[] hmac, Authorization auth, Integer driftAllowance)
