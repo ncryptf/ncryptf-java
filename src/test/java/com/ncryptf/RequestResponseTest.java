@@ -166,4 +166,18 @@ public class RequestResponseTest
             fail(e);
         }
     }
+
+    @Test
+    void testPublicKeyExtraction()
+    {
+        byte[] publicKey = Response.getPublicKeyFromResponse(this.expectedv2Cipher);
+        assertEquals(new String(Hex.encodeHex(this.clientKeyPairPublic)), new String(Hex.encodeHex(publicKey)));
+    }
+
+    @Test
+    void testVersion()
+    {
+        assertEquals(1, Response.getVersion(this.expectedCipher));
+        assertEquals(2, Response.getVersion(this.expectedv2Cipher));
+    }
 }
