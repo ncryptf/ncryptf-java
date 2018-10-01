@@ -27,7 +27,6 @@ final public class Request
      */
     private byte[] secretKey;
 
-
     /**
      * 64 byte signature secret key
      */
