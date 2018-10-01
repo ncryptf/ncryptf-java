@@ -56,11 +56,11 @@ public class RequestResponseTest
     {
         try {
             Request request = new Request(
-                clientKeyPairSecret,
-                serverKeyPairPublic
+                this.clientKeyPairSecret,
+                this.signatureKeyPairSecret
             );
 
-            byte[] cipher = request.encrypt(this.payload, this.signatureKeyPairSecret, 2, this.nonce);
+            byte[] cipher = request.encrypt(this.payload, this.serverKeyPairPublic, 2, this.nonce);
 
             String eCipher = new String(Hex.encodeHex(this.expectedv2Cipher));
             String aCipher = new String(Hex.encodeHex(cipher));
@@ -70,7 +70,7 @@ public class RequestResponseTest
                 serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher);
+            String decrypted = response.decrypt(cipher, this.clientKeyPairPublic);
             assertEquals(payload, decrypted);
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
@@ -82,17 +82,17 @@ public class RequestResponseTest
     {
         try {
             Request request = new Request(
-                clientKeyPairSecret,
-                serverKeyPairPublic
+                this.clientKeyPairSecret,
+                this.signatureKeyPairSecret
             );
 
-            byte[] cipher = request.encrypt("", this.signatureKeyPairSecret, 2, this.nonce);
+            byte[] cipher = request.encrypt("", this.serverKeyPairPublic, 2, this.nonce);
 
             Response response = new Response(
-                serverKeyPairSecret
+                this.serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher);
+            String decrypted = response.decrypt(cipher, this.clientKeyPairPublic);
             assertEquals("", decrypted);
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
@@ -102,7 +102,7 @@ public class RequestResponseTest
     @Test
     void testv2DecryptWithSmallPayload()
     {
-        assertThrows(DecryptionFailedException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             byte[] header = Hex.decodeHex("DE259002");
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             stream.write(header);
@@ -111,20 +111,20 @@ public class RequestResponseTest
             Response response = new Response(
                 serverKeyPairSecret
             );
-            response.decrypt(stream.toByteArray());
+            response.decrypt(stream.toByteArray(), this.clientKeyPairPublic);
         });
     }
 
     @Test
     void testv1DecryptWithSmallPayload()
     {
-        assertThrows(DecryptionFailedException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             byte[] cipher = new byte[15];
 
             Response response = new Response(
                 serverKeyPairSecret
             );
-            response.decrypt(cipher);
+            response.decrypt(cipher, this.clientKeyPairPublic);
         });
     }
 
@@ -133,18 +133,17 @@ public class RequestResponseTest
     {
         try {
             Request request = new Request(
-                clientKeyPairSecret,
-                serverKeyPairPublic
+                this.clientKeyPairSecret,
+                this.signatureKeyPairSecret
             );
-            byte[] cipher = request.encrypt(this.payload, null, 1, this.nonce);
-            byte[] signature = request.sign(this.payload, this.signatureKeyPairSecret);
+            byte[] cipher = request.encrypt(this.payload, this.serverKeyPairPublic, 1, this.nonce);
+            byte[] signature = request.sign(this.payload);
 
             Response response = new Response(
-                this.serverKeyPairSecret,
-                this.clientKeyPairPublic
+                this.serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher, this.nonce);
+            String decrypted = response.decrypt(cipher, this.clientKeyPairPublic, this.nonce);
 
             String eCipher = new String(Hex.encodeHex(this.expectedCipher));
             String aCipher = new String(Hex.encodeHex(cipher));
@@ -163,7 +162,7 @@ public class RequestResponseTest
             );
 
             assertTrue(isSignatureValid);
-        } catch (EncryptionFailedException | DecryptionFailedException | SigningException | SignatureVerificationException | InvalidChecksumException | InvalidSignatureException e) {
+        } catch (IllegalArgumentException | EncryptionFailedException | DecryptionFailedException | SigningException | SignatureVerificationException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
         }
     }

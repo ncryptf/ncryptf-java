@@ -69,7 +69,7 @@ final public class Authorization
      * @param token         A Token object
      * @param date          A ZonedDateTime object
      * @param payload       String payload
-     * @throws KeyDerivationException
+     * @throws KeyDerivationException If the authorization object cannot be generated
      */
     public Authorization(String httpMethod, String uri, Token token, ZonedDateTime date, String payload) throws KeyDerivationException
     {
@@ -85,7 +85,7 @@ final public class Authorization
      * @param date          A ZonedDateTime object
      * @param payload       String payload
      * @param version       The version to generate
-     * @throws KeyDerivationException
+     * @throws KeyDerivationException If the authorization object cannot be generated
      */
     public Authorization(String httpMethod, String uri, Token token, ZonedDateTime date, String payload, int version) throws KeyDerivationException
     {
@@ -102,7 +102,7 @@ final public class Authorization
      * @param payload       String payload
      * @param version       The version to generate
      * @param salt          Optional 32 byte fixed salt value
-     * @throws KeyDerivationException
+     * @throws KeyDerivationException If the authorization object cannot be generated
      */
     public Authorization(String httpMethod, String uri, Token token, ZonedDateTime date, String payload, int version, byte[] salt) throws KeyDerivationException
     {

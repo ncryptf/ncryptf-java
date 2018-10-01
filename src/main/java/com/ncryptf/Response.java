@@ -8,7 +8,6 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.interfaces.GenericHash;
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
-
 import com.ncryptf.exceptions.DecryptionFailedException;
 import com.ncryptf.exceptions.InvalidChecksumException;
 import com.ncryptf.exceptions.InvalidSignatureException;
@@ -18,11 +17,6 @@ import org.apache.commons.codec.binary.Hex;
 
 public class Response
 {
-    /**
-     * KeyPair for the reuqest
-     */
-    private Keypair keypair;
-
     /**
      * Secret key bytes
      */
@@ -37,54 +31,53 @@ public class Response
      * Constructor 
      * 
      * @param secretKey 32 byte secret key
+     * @throws IllegalArgumentException If the secret key length is invalid
      */
     public Response(byte[] secretKey)
     {
         this.sodium = new LazySodiumJava(new SodiumJava());
+        if (secretKey.length != Box.SECRETKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Secret key should be %d bytes", Box.SECRETKEYBYTES));
+        }
+
         this.secretKey = secretKey;
-    }
-    /**
-     * Constructor 
-     * 
-     * @param secretKey 32 byte secret key
-     * @param publicKey 32 byte public key
-     */
-    public Response(byte[] secretKey, byte[] publicKey)
-    {
-        this.sodium = new LazySodiumJava(new SodiumJava());
-        this.keypair = new Keypair(secretKey, publicKey);
     }
 
     /**
      * Decrypts a v2 encrypted body
      * 
-     * @param response Byte data returned by the server
-     * @return Decrypted response as a String
-     * @throws DecryptionFailedException
-     * @throws InvalidChecksumException
-     * @throws InvalidSignatureException
+     * @param response      Byte data returned by the server
+     * @param publicKey     32 byte public key
+     * @return              Decrypted response as a String
+     * @throws DecryptionFailedException If the message could not be decrypted
+     * @throws InvalidChecksumException If the checksum generated from the message doesn't match the checksum associated with the message
+     * @throws InvalidSignatureException If the signature check fails
+     * @throws IllegalArgumentException If the response length is too short
      */
-    public String decrypt(byte[] response) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
+    public String decrypt(byte[] response, byte[] publicKey) throws IllegalArgumentException, DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
         if (response.length < 236) {
-            throw new DecryptionFailedException();
+            throw new IllegalArgumentException();
         }
+
         byte[] nonce = Arrays.copyOfRange(response, 4, 28);
-        return this.decrypt(response, nonce);
+        return this.decrypt(response, publicKey, nonce);
     }
 
     /**
      * Decrypts a v1 or a v2 encrypted body
-     * @param response Byte data returned by the server
-     * @param nonce 24 byte nonce
-     * @return Decrypted response as a string
-     * @throws DecryptionFailedException
-     * @throws InvalidChecksumException
-     * @throws InvalidSignatureException
+     * @param response      Byte data returned by the server
+     * @param publicKey     32 byte public key
+     * @param nonce         24 byte nonce
+     * @return              Decrypted response as a string
+     * @throws DecryptionFailedException If the message could not be decrypted
+     * @throws InvalidChecksumException If the checksum generated from the message doesn't match the checksum associated with the message
+     * @throws InvalidSignatureException If the signature check fails
+     * @throws IllegalArgumentException If the response length is too short
      */
-    public String decrypt(byte[] response, byte[] nonce) throws DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
+    public String decrypt(byte[] response, byte[] publicKey, byte[] nonce) throws IllegalArgumentException, DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
-        int version = this.getVersion(response);
+        int version = getVersion(response);
         if (version == 2) {
             /**
              * Payload should be a minimum of 236 bytes
@@ -97,7 +90,7 @@ public class Response
              * 64 byte checksum
              */
             if (response.length < 236) {
-                throw new DecryptionFailedException();
+                throw new IllegalArgumentException();
             }
             byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
             byte[] checksum = Arrays.copyOfRange(response, response.length - 64, response.length);
@@ -113,14 +106,12 @@ public class Response
                 throw new InvalidChecksumException();
             }
 
-            byte[] publicKey = Arrays.copyOfRange(response, 28, 60);
+            publicKey = Arrays.copyOfRange(response, 28, 60);
             byte[] signature = Arrays.copyOfRange(payload, payload.length - 64, payload.length);
             byte[] sigPubKey = Arrays.copyOfRange(payload, payload.length - 96, payload.length - 64);
             byte[] body = Arrays.copyOfRange(payload, 60, payload.length - 96);
 
-            this.keypair = new Keypair(this.secretKey, publicKey);
-
-            String decryptedPayload = this.decryptBody(body, nonce);
+            String decryptedPayload = this.decryptBody(body, publicKey, nonce);
 
             try {
                 if (!this.isSignatureValid(decryptedPayload, signature, sigPubKey)) {
@@ -133,23 +124,24 @@ public class Response
             return decryptedPayload;
         }
 
-        return this.decryptBody(response, nonce);
+        return this.decryptBody(response, publicKey, nonce);
     }
     
     /**
      * Decrypts the raw response
      * 
      * @param response  Raw byte array response from the server
+     * @param publicKey 32 byte public key
      * @param nonce     24 byte nonce sent by the server
      * @return          Returns the decrypted payload as a string
-     * @throws DecryptionFailedException
+     * @throws DecryptionFailedException If the message could not be decrypted
      */
-    private String decryptBody(byte[] response, byte[] nonce) throws DecryptionFailedException
+    private String decryptBody(byte[] response, byte[] publicKey, byte[] nonce) throws DecryptionFailedException
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
             if (response.length < Box.MACBYTES) {
-                throw new DecryptionFailedException();
+                throw new IllegalArgumentException();
             }
             byte[] message = new byte[response.length - Box.MACBYTES];
 
@@ -158,8 +150,8 @@ public class Response
                 response,
                 response.length,
                 nonce,
-                this.keypair.getPublicKey(),
-                this.keypair.getSecretKey()
+                publicKey,
+                this.secretKey
             );
 
             if (result) {
@@ -179,7 +171,7 @@ public class Response
      * @param signature 64 byte signature
      * @param publicKey 32 byte public key of the signature
      * @return          `true` if the signature is valid, false otherwise
-     * @throws SignatureVerificationException
+     * @throws SignatureVerificationException If the detached signature could not be generated
      */
     public boolean isSignatureValid(String response, byte[] signature, byte[] publicKey) throws SignatureVerificationException
     {
@@ -197,17 +189,60 @@ public class Response
             throw new SignatureVerificationException();
         }
     }
+    
+    /**
+     * Extracts the public key from a v2 response
+     * @param response  Response bytes
+     * @return          32 byte public key
+     * @throws IllegalArgumentException If the response length is too short, or a version 1 message was passed
+     */
+    public static byte[] getPublicKeyFromResponse(byte[] response) throws IllegalArgumentException
+    {
+        int version = getVersion(response);
+        if (version == 2) {
+            if (response.length < 236) {
+                throw new IllegalArgumentException();
+            }
+
+            return Arrays.copyOfRange(response, 28, 60);
+        }
+
+        throw new IllegalArgumentException("The response provided is not suitable for public key extraction");
+    }
+
+    /**
+     * Extracts the signature public key from a v2 response
+     * @param response  Response bytes
+     * @return          Signature public key bytes
+     * @throws IllegalArgumentException If the response length is too short, or a version 1 message was passed
+     */
+    public static byte[] getSignaturePublicKeyFromResponse(byte[] response) throws IllegalArgumentException
+    {
+        int version = getVersion(response);
+        if (version == 2) {
+            if (response.length < 236) {
+                throw new IllegalArgumentException();
+            }
+
+            byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
+
+            return Arrays.copyOfRange(payload, payload.length - 96, payload.length - 64);
+        }
+
+        throw new IllegalArgumentException("The response provided is not suitable for public key extraction");
+    }
 
     /**
      * Returns the version from the response
      * 
-     * @param response
-     * @return int
+     * @param response  Response bytes
+     * @return int      The version
+     * @throws IllegalArgumentException If the response length is too short.
      */
-    private int getVersion(byte[] response) throws DecryptionFailedException
+    public static int getVersion(byte[] response) throws IllegalArgumentException
     {
         if (response.length < 16) {
-            throw new DecryptionFailedException();
+            throw new IllegalArgumentException();
         }
 
         byte[] header = Arrays.copyOfRange(response, 0, 4);

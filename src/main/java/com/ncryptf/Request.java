@@ -18,14 +18,20 @@ import org.apache.commons.codec.binary.Hex;
 final public class Request
 {
     /**
-     * KeyPair for the reuqest
-     */
-    private Keypair keypair;
-
-    /**
      * Libsodium implementation
      */
     private LazySodiumJava sodium;
+
+    /**
+     * 32 byte secret key
+     */
+    private byte[] secretKey;
+
+
+    /**
+     * 64 byte signature secret key
+     */
+    private byte[] signatureSecretKey;
 
     /**
      * 24 byte nonce used for the request
@@ -35,82 +41,87 @@ final public class Request
     /**
      * Constructor 
      * 
-     * @param secretKey 32 byte secret key
-     * @param publicKey 32 byte public key
+     * @param secretKey             32 byte secret key
+     * @param signatureSecretKey    64 byte signature secret key
+     * @throws IllegalArgumentException If the secret key or signatureSecretKey byte lengths are invalid
      */
-    public Request(byte[] secretKey, byte[] publicKey)
+    public Request(byte[] secretKey, byte[] signatureSecretKey)
     {
         this.sodium = new LazySodiumJava(new SodiumJava());
-        this.keypair = new Keypair(
-            secretKey,
-            publicKey
-        );
+        if (secretKey.length != Box.SECRETKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Secret key should be %d bytes", Box.SECRETKEYBYTES));
+        }
+
+        this.secretKey = secretKey;
+
+        if (signatureSecretKey.length != Sign.SECRETKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Secret key should be %d bytes", Sign.SECRETKEYBYTES));
+        }
+
+        this.signatureSecretKey = signatureSecretKey;
     }
 
     /**
      * Encrypts the payload
      * 
-     * @param data          String payload to encrypt
-     * @param signatureKey  32 byte signing key
-     * @return              Byte array containing the encrypted data
-     * @throws EncryptionFailedException
+     * @param data              String payload to encrypt
+     * @param remotePublicKey   32 byte public key
+     * @return                  Byte array containing the encrypted data
+     * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] signatureKey) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] remotePublicKey) throws EncryptionFailedException
     {
         byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
-        return encrypt(data, signatureKey, 2, nonce);
+        return encrypt(data, remotePublicKey, 2, nonce);
     }
 
     /**
      * Encrypts the payload with a specified version, and a generated nonce
      * 
-     * @param data          String payload to encrypt
-     * @param signatureKey  32 byte signing key
-     * @param version       Version to generate
-     * @return              Byte array containing the encrypted data
-     * @throws EncryptionFailedException
+     * @param data              String payload to encrypt
+     * @param remotePublicKey   32 byte public key
+     * @param version           Version to generate
+     * @return                  Byte array containing the encrypted data
+     * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] signatureKey, int version) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] remotePublicKey, int version) throws EncryptionFailedException
     {
         byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
-        return this.encrypt(data, signatureKey, version, nonce);
+        return this.encrypt(data, remotePublicKey, version, nonce);
     }
 
     /**
      * Encrypts the payload with a specified version and optional nonce
      * 
-     * @param data          String payload to encrypt
-     * @param signatureKey  32 byte signing key
-     * @param version       Version to generate
-     * @param nonce         24 byte
-     * @return              Byte array containing the encrypted data
-     * @throws EncryptionFailedException
+     * @param data              String payload to encrypt
+     * @param remotePublicKey   32 byte signing key
+     * @param version           Version to generate
+     * @param nonce             24 byte
+     * @return                  Byte array containing the encrypted data
+     * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] signatureKey, int version, byte[] nonce) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] remotePublicKey, int version, byte[] nonce) throws EncryptionFailedException
     {
         if (version == 2) {
             try {
-                if (signatureKey == null) {
-                    throw new EncryptionFailedException();
-                }
                 byte[] header = Hex.decodeHex("DE259002");
-                byte[] body = this.encryptBody(data, nonce);
+                byte[] body = this.encryptBody(data, remotePublicKey, nonce);
     
                 if (body == null) {
                     throw new EncryptionFailedException();
                 }
     
                 byte[] publicKey = new byte[32];
-                if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.keypair.getSecretKey()) != 0) {
+                if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.secretKey) != 0) {
                     throw new EncryptionFailedException();
                 }
     
                 byte[] sigPubKey = new byte[32];
-                if (this.sodium.getSodium().crypto_sign_ed25519_sk_to_pk(sigPubKey, signatureKey) != 0) {
+                if (this.sodium.getSodium().crypto_sign_ed25519_sk_to_pk(sigPubKey, this.signatureSecretKey) != 0) {
                     throw new EncryptionFailedException();
                 }
 
-                byte[] signature = this.sign(data, signatureKey);
+                byte[] signature = this.sign(data);
                 if (signature == null) {
                     throw new EncryptionFailedException();
                 }
@@ -139,18 +150,19 @@ final public class Request
             }
         }
 
-        return this.encryptBody(data, nonce);
+        return this.encryptBody(data, remotePublicKey, nonce);
     }
 
     /**
      * Encrypts the payload
      * 
-     * @param data  String payload to encrypt
-     * @param nonce 24 byte nonce
-     * @return      Byte array containing the encrypted data
-     * @throws EncryptionFailedException
+     * @param data      String payload to encrypt
+     * @param publicKey 32 byte public key
+     * @param nonce     24 byte nonce
+     * @return          Byte array containing the encrypted data
+     * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    private byte[] encryptBody(String data, byte[] nonce) throws EncryptionFailedException
+    private byte[] encryptBody(String data, byte[] publicKey, byte[] nonce) throws EncryptionFailedException
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
@@ -162,8 +174,8 @@ final public class Request
                 message,
                 message.length,
                 nonce,
-                this.keypair.getPublicKey(),
-                this.keypair.getSecretKey()
+                publicKey,
+                this.secretKey
             );
             
             if (result) {
@@ -179,23 +191,22 @@ final public class Request
     /**
      * Signs the payload
      * @param data          String payload to sign
-     * @param secretKey     Signing secret key
      * @return              64 byte signature
-     * @throws SigningException
+     * @throws SigningException If the data cannot be signed
      */
-    public byte[] sign(String data, byte[] secretKey) throws SigningException
+    public byte[] sign(String data) throws SigningException
     {
         try {
             byte[] message = data.getBytes("UTF-8");
             byte[] signature = new byte[Sign.BYTES];
-            Sign.Native sign = (Sign.Native) this.sodium;
+            Sign.Native sign = (Sign.Native) sodium;
 
             boolean result = sign.cryptoSignDetached(
                 signature,
                 null,
                 message,
                 (long)message.length,
-                secretKey
+                this.signatureSecretKey
             );
 
             if (result) {

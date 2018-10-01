@@ -4,7 +4,6 @@
 [![TravisCI](https://img.shields.io/travis/ncryptf/ncryptf-java.svg?style=flat-square "TravisCI")](https://travis-ci.com.//ncryptf/ncryptf-java)
 [![License](https://img.shields.io/badge/license-BSD-orange.svg?style=flat-square "License")](https://github.com/ncryptf/ncryptf-java/blob/master/LICENSE.md)
 
-
 <center>
     <img src="https://github.com/charlesportwoodii/ncryptf-java/blob/master/logo.png?raw=true" alt="ncryptf logo" width="400px"/>
 </center>
@@ -245,12 +244,12 @@ String payload = "{\"foo\":\"bar\"}";
 
 try {
     // 32 byte secret and public key. Extract from kp.get...().getAsBytes(), or another libsodium method
-    Request request = new Request(secretKeyBytes, publicKeyBytes);
+    Request request = new Request(secretKeyBytes, signingSecretKeyBytes /* token.signature */);
 
     // Cipher now contains the encryted data
     // Signature should be the signature private key previously agreed upon with the sender
     // If you're using a `Token` object, this should be the `.signature` property
-    byte[] cipher = request.encrypt(payload, token.signature);
+    byte[] cipher = request.encrypt(payload, remotePublicKey);
 
     // Send as encrypted request body
     String b64Body = Base64.getEncoder().encode(cipher);
@@ -277,7 +276,7 @@ try {
     byte[] responseFromServer = Base64.getDecoder().decode("<HTTP-Response-Body>");
     Response response = new Response(clientSecretKey);
 
-    String decrypted = response.decrypt(responseFromServer);
+    String decrypted = response.decrypt(responseFromServer, remotePublicKey);
 } catch (InvalidChecksumException e) {
     // Checksum is not valid. Request body was tampered with
 } catch (InvalidSignatureException e) {
