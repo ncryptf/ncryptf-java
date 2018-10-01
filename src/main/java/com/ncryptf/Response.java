@@ -47,6 +47,26 @@ public class Response
      * Decrypts a v2 encrypted body
      * 
      * @param response      Byte data returned by the server
+     * @return              Decrypted response as a String
+     * @throws DecryptionFailedException If the message could not be decrypted
+     * @throws InvalidChecksumException If the checksum generated from the message doesn't match the checksum associated with the message
+     * @throws InvalidSignatureException If the signature check fails
+     * @throws IllegalArgumentException If the response length is too short
+     */
+    public String decrypt(byte[] response) throws IllegalArgumentException, DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
+    {
+        if (response.length < 236) {
+            throw new IllegalArgumentException();
+        }
+
+        byte[] nonce = Arrays.copyOfRange(response, 4, 28);
+        return this.decrypt(response, null, nonce);
+    }
+
+    /**
+     * Decrypts a v2 encrypted body
+     * 
+     * @param response      Byte data returned by the server
      * @param publicKey     32 byte public key
      * @return              Decrypted response as a String
      * @throws DecryptionFailedException If the message could not be decrypted
@@ -124,6 +144,9 @@ public class Response
             return decryptedPayload;
         }
 
+        if (publicKey.length != Box.PUBLICKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
+        }
         return this.decryptBody(response, publicKey, nonce);
     }
     

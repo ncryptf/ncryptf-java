@@ -70,7 +70,7 @@ public class RequestResponseTest
                 serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher, this.clientKeyPairPublic);
+            String decrypted = response.decrypt(cipher);
             assertEquals(payload, decrypted);
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
@@ -92,7 +92,7 @@ public class RequestResponseTest
                 this.serverKeyPairSecret
             );
 
-            String decrypted = response.decrypt(cipher, this.clientKeyPairPublic);
+            String decrypted = response.decrypt(cipher);
             assertEquals("", decrypted);
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
