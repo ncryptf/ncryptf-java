@@ -101,6 +101,10 @@ final public class Request
      */
     public byte[] encrypt(String data, byte[] remotePublicKey, int version, byte[] nonce) throws EncryptionFailedException
     {
+        if (remotePublicKey.length != Box.PUBLICKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
+        }
+
         if (version == 2) {
             try {
                 byte[] header = Hex.decodeHex("DE259002");
@@ -163,6 +167,9 @@ final public class Request
      */
     private byte[] encryptBody(String data, byte[] publicKey, byte[] nonce) throws EncryptionFailedException
     {
+        if (publicKey.length != Box.PUBLICKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
+        }
         try {
             Box.Native box = (Box.Native) this.sodium;
             byte[] message = data.getBytes("UTF-8");
