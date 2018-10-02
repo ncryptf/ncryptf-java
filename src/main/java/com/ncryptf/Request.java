@@ -170,6 +170,7 @@ final public class Request
         if (publicKey.length != Box.PUBLICKEYBYTES) {
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
         }
+        
         try {
             Box.Native box = (Box.Native) this.sodium;
             byte[] message = data.getBytes("UTF-8");

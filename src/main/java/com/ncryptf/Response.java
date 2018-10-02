@@ -112,6 +112,7 @@ public class Response
             if (response.length < 236) {
                 throw new IllegalArgumentException();
             }
+
             byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
             byte[] checksum = Arrays.copyOfRange(response, response.length - 64, response.length);
             GenericHash.Native gh = (GenericHash.Native) this.sodium;
@@ -147,6 +148,7 @@ public class Response
         if (publicKey.length != Box.PUBLICKEYBYTES) {
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
         }
+
         return this.decryptBody(response, publicKey, nonce);
     }
     
@@ -163,9 +165,15 @@ public class Response
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
+            
+            if (publicKey.length != Box.PUBLICKEYBYTES) {
+                throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
+            }
+
             if (response.length < Box.MACBYTES) {
                 throw new IllegalArgumentException();
             }
+
             byte[] message = new byte[response.length - Box.MACBYTES];
 
             boolean result = box.cryptoBoxOpenEasy(
