@@ -234,28 +234,6 @@ public class Response
     }
 
     /**
-     * Extracts the signature public key from a v2 response
-     * @param response  Response bytes
-     * @return          Signature public key bytes
-     * @throws IllegalArgumentException If the response length is too short, or a version 1 message was passed
-     */
-    public static byte[] getSignaturePublicKeyFromResponse(byte[] response) throws IllegalArgumentException
-    {
-        int version = getVersion(response);
-        if (version == 2) {
-            if (response.length < 236) {
-                throw new IllegalArgumentException();
-            }
-
-            byte[] payload = Arrays.copyOfRange(response, 0, response.length - 64);
-
-            return Arrays.copyOfRange(payload, payload.length - 96, payload.length - 64);
-        }
-
-        throw new IllegalArgumentException("The response provided is not suitable for public key extraction");
-    }
-
-    /**
      * Returns the version from the response
      * 
      * @param response  Response bytes
