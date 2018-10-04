@@ -123,7 +123,7 @@ public class Response
             }
 
             // If the checksum is invalid, throw an exception
-            if (!Arrays.equals(checksum, calculatedChecksum)) {
+            if (this.sodium.getSodium().sodium_memcmp(checksum, calculatedChecksum, 64) != 0) {
                 throw new InvalidChecksumException();
             }
 
@@ -132,6 +132,12 @@ public class Response
             byte[] sigPubKey = Arrays.copyOfRange(payload, payload.length - 96, payload.length - 64);
             byte[] body = Arrays.copyOfRange(payload, 60, payload.length - 96);
 
+            System.out.println(this.sodium.toHex(publicKey));
+            System.out.println(this.sodium.toHex(signature));
+            System.out.println(this.sodium.toHex(sigPubKey));
+            System.out.println(this.sodium.toHex(body));
+            System.out.println(this.sodium.toHex(nonce));
+            System.out.println(body.length);
             String decryptedPayload = this.decryptBody(body, publicKey, nonce);
 
             try {
