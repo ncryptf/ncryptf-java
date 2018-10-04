@@ -108,6 +108,8 @@ final public class Request
         if (nonce.length != Box.NONCEBYTES) {
             throw new IllegalArgumentException(String.format("Nonce should be %d bytes", Box.NONCEBYTES));
         }
+        
+        this.nonce = nonce;
 
         if (version == 2) {
             try {
