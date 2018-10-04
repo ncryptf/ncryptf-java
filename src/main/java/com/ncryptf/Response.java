@@ -97,6 +97,10 @@ public class Response
      */
     public String decrypt(byte[] response, byte[] publicKey, byte[] nonce) throws IllegalArgumentException, DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
+        if (nonce.length != Box.NONCEBYTES) {
+            throw new IllegalArgumentException();
+        }
+
         int version = getVersion(response);
         if (version == 2) {
             /**
@@ -171,7 +175,7 @@ public class Response
             }
 
             if (response.length < Box.MACBYTES) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format("Nonce should be %d bytes", Box.NONCEBYTES));
             }
 
             byte[] message = new byte[response.length - Box.MACBYTES];

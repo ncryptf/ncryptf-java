@@ -105,6 +105,10 @@ final public class Request
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
         }
 
+        if (nonce.length != Box.NONCEBYTES) {
+            throw new IllegalArgumentException(String.format("Nonce should be %d bytes", Box.NONCEBYTES));
+        }
+
         if (version == 2) {
             try {
                 byte[] header = Hex.decodeHex("DE259002");
