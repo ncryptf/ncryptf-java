@@ -197,7 +197,7 @@ The Version 1 HMAC header requires an additional `X-Date` header. The `X-Date` h
 
 ## Encrypted Requests & Responses
 
-This library enables clients coding in PHP 7.1+ to establish and trusted encrypted session on top of a TLS layer, while simultaniously (and independently) providing the ability authenticate and identify a client via HMAC+HKDF style authentication.
+This library enables clients to establish and trusted encrypted session on top of a TLS layer, while simultaniously (and independently) providing the ability authenticate and identify a client via HMAC+HKDF style authentication.
 
 The rationale for this functionality includes but is not limited to:
 
