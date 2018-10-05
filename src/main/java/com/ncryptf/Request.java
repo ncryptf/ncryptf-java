@@ -64,44 +64,44 @@ final public class Request
      * Encrypts the payload
      * 
      * @param data              String payload to encrypt
-     * @param remotePublicKey   32 byte public key
+     * @param publicKey   32 byte public key
      * @return                  Byte array containing the encrypted data
      * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] remotePublicKey) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] publicKey) throws EncryptionFailedException
     {
         byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
-        return encrypt(data, remotePublicKey, 2, nonce);
+        return encrypt(data, publicKey, 2, nonce);
     }
 
     /**
      * Encrypts the payload with a specified version, and a generated nonce
      * 
      * @param data              String payload to encrypt
-     * @param remotePublicKey   32 byte public key
+     * @param publicKey   32 byte public key
      * @param version           Version to generate
      * @return                  Byte array containing the encrypted data
      * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] remotePublicKey, int version) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] publicKey, int version) throws EncryptionFailedException
     {
         byte[] nonce = this.sodium.randomBytesBuf(Box.NONCEBYTES);
-        return this.encrypt(data, remotePublicKey, version, nonce);
+        return this.encrypt(data, publicKey, version, nonce);
     }
 
     /**
      * Encrypts the payload with a specified version and optional nonce
      * 
      * @param data              String payload to encrypt
-     * @param remotePublicKey   32 byte signing key
+     * @param publicKey   32 byte signing key
      * @param version           Version to generate
      * @param nonce             24 byte
      * @return                  Byte array containing the encrypted data
      * @throws EncryptionFailedException If the message cannot be encrypted
      */
-    public byte[] encrypt(String data, byte[] remotePublicKey, int version, byte[] nonce) throws EncryptionFailedException
+    public byte[] encrypt(String data, byte[] publicKey, int version, byte[] nonce) throws EncryptionFailedException
     {
-        if (remotePublicKey.length != Box.PUBLICKEYBYTES) {
+        if (publicKey.length != Box.PUBLICKEYBYTES) {
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
         }
 
@@ -114,14 +114,14 @@ final public class Request
         if (version == 2) {
             try {
                 byte[] header = Hex.decodeHex("DE259002");
-                byte[] body = this.encryptBody(data, remotePublicKey, nonce);
+                byte[] body = this.encryptBody(data, publicKey, nonce);
     
                 if (body == null) {
                     throw new EncryptionFailedException();
                 }
     
-                byte[] publicKey = new byte[32];
-                if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.secretKey) != 0) {
+                byte[] iPublicKey = new byte[32];
+                if (this.sodium.getSodium().crypto_scalarmult_base(iPublicKey, this.secretKey) != 0) {
                     throw new EncryptionFailedException();
                 }
     
@@ -138,7 +138,7 @@ final public class Request
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 stream.write(header);
                 stream.write(nonce);
-                stream.write(publicKey);
+                stream.write(iPublicKey);
                 stream.write(body);
                 stream.write(sigPubKey);
                 stream.write(signature);
@@ -159,7 +159,7 @@ final public class Request
             }
         }
 
-        return this.encryptBody(data, remotePublicKey, nonce);
+        return this.encryptBody(data, publicKey, nonce);
     }
 
     /**
@@ -175,6 +175,10 @@ final public class Request
     {
         if (publicKey.length != Box.PUBLICKEYBYTES) {
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
+        }
+
+        if (nonce.length != Box.NONCEBYTES) {
+            throw new IllegalArgumentException(String.format("Nonce should be %d bytes", Box.NONCEBYTES));
         }
         
         try {
