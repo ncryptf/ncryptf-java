@@ -74,7 +74,7 @@ The HTML documentation will be placed in `./target/site/apidocs/index.html`
 
 HMAC+HKDF Authentication is an Authentication method that allows ensures the request is not tampered with in transit. This provides resiliance not only against network layer manipulation, but also man-in-the-middle attacks.
 
-At a high level, an HMAC signature is created based upon the raw request body, the HTTP method, the URI (with query parameters, if present), and the current date. In addition to ensuring the request cannot be manipulated in transit, it also ensures that the reqest is timeboxed, effectively preventing replay attacks.
+At a high level, an HMAC signature is created based upon the raw request body, the HTTP method, the URI (with query parameters, if present), and the current date. In addition to ensuring the request cannot be manipulated in transit, it also ensures that the request is timeboxed, effectively preventing replay attacks.
 
 The library itself is made available by importing the following struct:
 
@@ -85,7 +85,7 @@ Supporting API's will return the following payload containing at minimum the fol
     "access_token": "7XF56VIP7ZQQOLGHM6MRIK56S2QS363ULNB5UKNFMJRQVYHQH7IA",
     "refresh_token": "MA2JX5FXWS57DHW4OIHHQDCJVGS3ZKKFCL7XM4GNOB567I6ER4LQ",
     "ikm": "bDEyECRvKKE8w81fX4hz/52cvHsFPMGeJ+a9fGaVvWM=",
-    "signing": "ecYXfAwNVoS9ePn4xWhiJOdXQzr6LpJIeIn4AVju/Ug=",
+    "signing": "7v/CdiGoEI7bcj7R2EyDPH5nrCd2+7rHYNACB+Kf2FMx405und2KenGjNpCBPv0jOiptfHJHiY3lldAQTGCdqw==",
     "expires_at": 1472678411
 }
 ```
@@ -135,7 +135,7 @@ Token token = new Token(
     "7XF56VIP7ZQQOLGHM6MRIK56S2QS363ULNB5UKNFMJRQVYHQH7IA",
     "7XF56VIP7ZQQOLGHM6MRIK56S2QS363ULNB5UKNFMJRQVYHQH7IA",
     Base64.decodeBase64("bDEyECRvKKE8w81fX4hz/52cvHsFPMGeJ+a9fGaVvWM="),
-    Base64.decodeBase64("ecYXfAwNVoS9ePn4xWhiJOdXQzr6LpJIeIn4AVju/Ug="),
+    Base64.decodeBase64("7v/CdiGoEI7bcj7R2EyDPH5nrCd2+7rHYNACB+Kf2FMx405und2KenGjNpCBPv0jOiptfHJHiY3lldAQTGCdqw=="),
     ZonedDateTime.ofInstant(Instant.ofEpochSecond(1472678411), ZoneOffset.UTC)
 )
 
@@ -197,7 +197,7 @@ The Version 1 HMAC header requires an additional `X-Date` header. The `X-Date` h
 
 ## Encrypted Requests & Responses
 
-This library enables clients coding in PHP 7.1+ to establish and trusted encrypted session on top of a TLS layer, while simultaniously (and independently) providing the ability authenticate and identify a client via HMAC+HKDF style authentication.
+This library enables clients to establish and trusted encrypted session on top of a TLS layer, while simultaniously (and independently) providing the ability authenticate and identify a client via HMAC+HKDF style authentication.
 
 The rationale for this functionality includes but is not limited to:
 

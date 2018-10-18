@@ -97,6 +97,10 @@ public class Response
      */
     public String decrypt(byte[] response, byte[] publicKey, byte[] nonce) throws IllegalArgumentException, DecryptionFailedException, InvalidChecksumException, InvalidSignatureException
     {
+        if (nonce.length != Box.NONCEBYTES) {
+            throw new IllegalArgumentException(String.format("Nonce should be %d bytes.", Box.NONCEBYTES));
+        }
+
         int version = getVersion(response);
         if (version == 2) {
             /**
@@ -123,7 +127,7 @@ public class Response
             }
 
             // If the checksum is invalid, throw an exception
-            if (!Arrays.equals(checksum, calculatedChecksum)) {
+            if (this.sodium.getSodium().sodium_memcmp(checksum, calculatedChecksum, 64) != 0) {
                 throw new InvalidChecksumException();
             }
 
@@ -161,8 +165,20 @@ public class Response
      * @return          Returns the decrypted payload as a string
      * @throws DecryptionFailedException If the message could not be decrypted
      */
-    private String decryptBody(byte[] response, byte[] publicKey, byte[] nonce) throws DecryptionFailedException
+    private String decryptBody(byte[] response, byte[] publicKey, byte[] nonce) throws IllegalArgumentException, DecryptionFailedException
     {
+        if (publicKey.length != Box.PUBLICKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Public key should be %d bytes.", Box.PUBLICKEYBYTES));
+        }
+
+        if (nonce.length < Box.NONCEBYTES) {
+            throw new IllegalArgumentException(String.format("Nonce should be %d bytes.", Box.NONCEBYTES));
+        }
+
+        if (response.length < Box.MACBYTES) {
+            throw new IllegalArgumentException(String.format("Message should be at minimum %d bytes.", Box.MACBYTES));
+        }
+
         try {
             Box.Native box = (Box.Native) this.sodium;
 
@@ -204,8 +220,16 @@ public class Response
      * @return          `true` if the signature is valid, false otherwise
      * @throws SignatureVerificationException If the detached signature could not be generated
      */
-    public boolean isSignatureValid(String response, byte[] signature, byte[] publicKey) throws SignatureVerificationException
+    public boolean isSignatureValid(String response, byte[] signature, byte[] publicKey) throws SignatureVerificationException, IllegalArgumentException
     {
+        if (signature.length != 64) {
+            throw new IllegalArgumentException(String.format("Signature should be %d bytes.", 64));
+        }
+
+        if (publicKey.length != Sign.PUBLICKEYBYTES) {
+            throw new IllegalArgumentException(String.format("Public key should be %d bytes.", Sign.PUBLICKEYBYTES));
+        }
+
         try {
             Sign.Native sign = (Sign.Native) this.sodium;
             byte[] message = response.getBytes("UTF-8");
@@ -270,7 +294,7 @@ public class Response
      */
     public static int getVersion(byte[] response) throws IllegalArgumentException
     {
-        if (response.length < 16) {
+        if (response.length < Box.MACBYTES) {
             throw new IllegalArgumentException();
         }
 
