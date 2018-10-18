@@ -1,4 +1,4 @@
-package com.ncryptf;
+package com.ncryptf.Test;
 
 public class TestCase
 {

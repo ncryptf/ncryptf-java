@@ -1,13 +1,15 @@
-package com.ncryptf;
+package com.ncryptf.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
+import com.ncryptf.Request;
+import com.ncryptf.Response;
 import com.ncryptf.exceptions.DecryptionFailedException;
 import com.ncryptf.exceptions.EncryptionFailedException;
 import com.ncryptf.exceptions.InvalidChecksumException;
@@ -16,14 +18,13 @@ import com.ncryptf.exceptions.SignatureVerificationException;
 import com.ncryptf.exceptions.SigningException;
 
 import org.apache.commons.codec.binary.Hex;
-
 import org.junit.jupiter.api.Test;
 
 public class RequestResponseTest
 {
     private byte[] clientKeyPairSecret = Base64.getDecoder().decode("bvV/vnfB43spmprI8aBK/Fd8xxSBlx7EhuxfxxTVI2o=");
     private byte[] clientKeyPairPublic = Base64.getDecoder().decode("Ojnr0KQy6GJ6x+eQa+wNwdHejZo8vY5VNyZY5NfwBjU=");
-    
+
     private byte[] serverKeyPairSecret = Base64.getDecoder().decode("gH1+ileX1W5fMeOWue8HxdREnK04u72ybxCQgivWoZ4=");
     private byte[] serverKeyPairPublic = Base64.getDecoder().decode("YU74X2OqHujLVDH9wgEHscD5eyiLPvcugRUZG6R3BB8=");
 
@@ -72,6 +73,28 @@ public class RequestResponseTest
 
             String decrypted = response.decrypt(cipher);
             assertEquals(payload, decrypted);
+        } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void testDecryptWithEmptyString()
+    {
+        try {
+            Request request = new Request(
+                this.clientKeyPairSecret,
+                this.signatureKeyPairSecret
+            );
+
+            byte[] cipher = request.encrypt("", this.serverKeyPairPublic, 2, this.nonce);
+
+            Response response = new Response(
+                serverKeyPairSecret
+            );
+
+            String decrypted = response.decrypt(cipher);
+            assertEquals("", decrypted);
         } catch (EncryptionFailedException | DecryptionFailedException | InvalidChecksumException | InvalidSignatureException e) {
             fail(e);
         }

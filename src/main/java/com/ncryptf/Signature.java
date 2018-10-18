@@ -15,7 +15,7 @@ final public class Signature
 {
     /**
      * Constructs a new v2 signature
-     * 
+     *
      * @param httpMethod    The HTTP method
      * @param uri           The full URI with query string parameters
      * @param salt          32 byte salt
@@ -35,7 +35,7 @@ final public class Signature
 
     /**
      * Constructs versioned signature
-     * 
+     *
      * @param httpMethod    The HTTP method
      * @param uri           The full URI with query string parameters
      * @param salt          32 byte salt
@@ -66,7 +66,7 @@ final public class Signature
 
     /**
      * Returns the signature hash
-     * 
+     *
      * @param data      The data to hash
      * @param salt      32 byte salt
      * @param version   The signature hash version to generate.
@@ -90,7 +90,7 @@ final public class Signature
 
             return new String(Base64.getEncoder().encode(h));
         }
-        
+
         return new String(Hex.encodeHex(DigestUtils.sha256(data))).toLowerCase();
     }
 }

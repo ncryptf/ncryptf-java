@@ -55,7 +55,7 @@ final public class Authorization
      * The default version to use for auth & signautres
      */
     private int version = 2;
-    
+
     /**
      * Libsodium implementation
      */
@@ -63,7 +63,7 @@ final public class Authorization
 
     /**
      * Constructor
-     * 
+     *
      * @param httpMethod    The HTTP method
      * @param uri           The URI with query string parameters
      * @param token         A Token object
@@ -78,7 +78,7 @@ final public class Authorization
 
     /**
      * Constructor
-     * 
+     *
      * @param httpMethod    The HTTP method
      * @param uri           The URI with query string parameters
      * @param token         A Token object
@@ -94,7 +94,7 @@ final public class Authorization
 
     /**
      * Constructor
-     * 
+     *
      * @param httpMethod    The HTTP method
      * @param uri           The URI with query string parameters
      * @param token         A Token object
@@ -122,8 +122,8 @@ final public class Authorization
             HKDF.fromHmacSha256().extract(salt, token.ikm),
             AUTH_INFO.getBytes(),
             32
-        );        
-        
+        );
+
         try {
             String hkdfString = new String(Hex.encodeHex(hkdf));
             byte[] key = (hkdfString).toLowerCase().getBytes("UTF-8");
@@ -205,7 +205,7 @@ final public class Authorization
                 return "HMAC " + b64;
             } catch (UnsupportedEncodingException e) {
                 return "";
-            }            
+            }
         }
 
         return "HMAC " + this.token.accessToken + "," + hmac + "," + salt;

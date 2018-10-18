@@ -1,6 +1,8 @@
-package com.ncryptf;
+package com.ncryptf.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.ncryptf.Signature;
 
 import org.junit.jupiter.api.Test;
 

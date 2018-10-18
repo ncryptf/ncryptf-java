@@ -28,8 +28,8 @@ public class Response
     private LazySodiumJava sodium;
 
     /**
-     * Constructor 
-     * 
+     * Constructor
+     *
      * @param secretKey 32 byte secret key
      * @throws IllegalArgumentException If the secret key length is invalid
      */
@@ -45,7 +45,7 @@ public class Response
 
     /**
      * Decrypts a v2 encrypted body
-     * 
+     *
      * @param response      Byte data returned by the server
      * @return              Decrypted response as a String
      * @throws DecryptionFailedException If the message could not be decrypted
@@ -65,7 +65,7 @@ public class Response
 
     /**
      * Decrypts a v2 encrypted body
-     * 
+     *
      * @param response      Byte data returned by the server
      * @param publicKey     32 byte public key
      * @return              Decrypted response as a String
@@ -151,10 +151,10 @@ public class Response
 
         return this.decryptBody(response, publicKey, nonce);
     }
-    
+
     /**
      * Decrypts the raw response
-     * 
+     *
      * @param response  Raw byte array response from the server
      * @param publicKey 32 byte public key
      * @param nonce     24 byte nonce sent by the server
@@ -165,7 +165,7 @@ public class Response
     {
         try {
             Box.Native box = (Box.Native) this.sodium;
-            
+
             if (publicKey.length != Box.PUBLICKEYBYTES) {
                 throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
             }
@@ -197,7 +197,7 @@ public class Response
 
     /**
      * Returns true if the detached signature is valid
-     * 
+     *
      * @param response  The decrypted response to verify
      * @param signature 64 byte signature
      * @param publicKey 32 byte public key of the signature
@@ -220,7 +220,7 @@ public class Response
             throw new SignatureVerificationException();
         }
     }
-    
+
     /**
      * Extracts the public key from a v2 response
      * @param response  Response bytes
@@ -242,8 +242,28 @@ public class Response
     }
 
     /**
+     * Extracts the signing public key from a v2 response
+     * @param response  Response bytes
+     * @return          32 byte public key
+     * @throws IllegalArgumentException If the response length is too short, or a version 1 message was passed
+     */
+    public static byte[] getSigningPublicKeyFromResponse(byte[] response) throws IllegalArgumentException
+    {
+        int version = getVersion(response);
+        if (version == 2) {
+            if (response.length < 236) {
+                throw new IllegalArgumentException();
+            }
+
+            return Arrays.copyOfRange(response, (response.length - 160), (response.length - 160) + 32);
+        }
+
+        throw new IllegalArgumentException("The response provided is not suitable for public key extraction");
+    }
+
+    /**
      * Returns the version from the response
-     * 
+     *
      * @param response  Response bytes
      * @return int      The version
      * @throws IllegalArgumentException If the response length is too short.

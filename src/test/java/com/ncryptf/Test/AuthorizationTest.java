@@ -1,16 +1,17 @@
-package com.ncryptf;
+package com.ncryptf.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.Base64;
-import com.ncryptf.exceptions.KeyDerivationException;
-import org.json.JSONObject;
-
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Base64;
+
+import com.ncryptf.Authorization;
+import com.ncryptf.exceptions.KeyDerivationException;
+
+import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
 
 public class AuthorizationTest extends AbstractTest
 {

@@ -1,9 +1,11 @@
-package com.ncryptf;
+package com.ncryptf.Test;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+
+import com.ncryptf.Token;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;

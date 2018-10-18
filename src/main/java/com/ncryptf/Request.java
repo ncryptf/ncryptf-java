@@ -38,8 +38,8 @@ final public class Request
     private byte[] nonce;
 
     /**
-     * Constructor 
-     * 
+     * Constructor
+     *
      * @param secretKey             32 byte secret key
      * @param signatureSecretKey    64 byte signature secret key
      * @throws IllegalArgumentException If the secret key or signatureSecretKey byte lengths are invalid
@@ -62,7 +62,7 @@ final public class Request
 
     /**
      * Encrypts the payload
-     * 
+     *
      * @param data              String payload to encrypt
      * @param remotePublicKey   32 byte public key
      * @return                  Byte array containing the encrypted data
@@ -76,7 +76,7 @@ final public class Request
 
     /**
      * Encrypts the payload with a specified version, and a generated nonce
-     * 
+     *
      * @param data              String payload to encrypt
      * @param remotePublicKey   32 byte public key
      * @param version           Version to generate
@@ -91,7 +91,7 @@ final public class Request
 
     /**
      * Encrypts the payload with a specified version and optional nonce
-     * 
+     *
      * @param data              String payload to encrypt
      * @param remotePublicKey   32 byte signing key
      * @param version           Version to generate
@@ -109,16 +109,16 @@ final public class Request
             try {
                 byte[] header = Hex.decodeHex("DE259002");
                 byte[] body = this.encryptBody(data, remotePublicKey, nonce);
-    
+
                 if (body == null) {
                     throw new EncryptionFailedException();
                 }
-    
+
                 byte[] publicKey = new byte[32];
                 if (this.sodium.getSodium().crypto_scalarmult_base(publicKey, this.secretKey) != 0) {
                     throw new EncryptionFailedException();
                 }
-    
+
                 byte[] sigPubKey = new byte[32];
                 if (this.sodium.getSodium().crypto_sign_ed25519_sk_to_pk(sigPubKey, this.signatureSecretKey) != 0) {
                     throw new EncryptionFailedException();
@@ -128,7 +128,7 @@ final public class Request
                 if (signature == null) {
                     throw new EncryptionFailedException();
                 }
-                
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 stream.write(header);
                 stream.write(nonce);
@@ -158,7 +158,7 @@ final public class Request
 
     /**
      * Encrypts the payload
-     * 
+     *
      * @param data      String payload to encrypt
      * @param publicKey 32 byte public key
      * @param nonce     24 byte nonce
@@ -170,7 +170,7 @@ final public class Request
         if (publicKey.length != Box.PUBLICKEYBYTES) {
             throw new IllegalArgumentException(String.format("Public key should be %d bytes", Box.PUBLICKEYBYTES));
         }
-        
+
         try {
             Box.Native box = (Box.Native) this.sodium;
             byte[] message = data.getBytes("UTF-8");
@@ -184,7 +184,7 @@ final public class Request
                 publicKey,
                 this.secretKey
             );
-            
+
             if (result) {
                 return cipher;
             }
