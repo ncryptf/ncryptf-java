@@ -20,5 +20,5 @@ jdk:
 matrix:
   fast_finish: true
   allow_failures:
-    - java: oraclejdk10
-    - java: oraclejdk11
+    - jdk: oraclejdk10
+    - jdk: oraclejdk11
