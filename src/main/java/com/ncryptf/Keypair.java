@@ -22,7 +22,7 @@ final public class Keypair
         if (secretKey.length % 16 != 0) {
             throw new IllegalArgumentException(String.format("Secret key should be a multiple of %d bytes.", 16));
         }
-        
+
         this.secretKey = secretKey;
 
         if (publicKey.length % 4 != 0) {

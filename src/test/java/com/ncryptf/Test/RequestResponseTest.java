@@ -173,7 +173,7 @@ public class RequestResponseTest
 
             String eSignature = new String(Hex.encodeHex(this.expectedSignature));
             String aSignature = new String(Hex.encodeHex(signature));
-            
+
             assertEquals(eCipher, aCipher);
             assertEquals(eSignature, aSignature);
             assertEquals(payload, decrypted);

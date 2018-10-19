@@ -58,7 +58,7 @@ final public class Signature
         String b64Salt = new String(Base64.getEncoder().encode(salt));
         String timestamp = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z").format(date).replaceAll(" GMT", " +0000");
 
-        return hash + "\n" + 
+        return hash + "\n" +
                httpMethod + "+" + uri + "\n" +
                timestamp + "\n" +
                b64Salt;

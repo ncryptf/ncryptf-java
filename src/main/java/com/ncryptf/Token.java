@@ -56,7 +56,7 @@ final public class Token
         if (signature.length != 64) {
             throw new IllegalArgumentException(String.format("Signature secret key should be %d bytes.", 64));
         }
-        
+
         this.signature = signature;
         this.expiresAt = expiresAt;
     }
