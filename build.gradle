@@ -71,7 +71,7 @@ dependencies {
     implementation group: 'at.favre.lib', name: 'hkdf', version:'1.0.0'
     implementation group: 'commons-codec', name: 'commons-codec', version:'1.11'
     implementation group: 'com.goterl.lazycode', name: 'lazysodium-java', version:'3.3.0'
-    implementation group: 'net.java.dev.jna', name: 'jna', version:'4.5.2'
+    implementation group: 'net.java.dev.jna', name: 'jna', version:'5.0.0'
     implementation group: 'org.json', name: 'json', version:'20180813'
 
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.1.0')
