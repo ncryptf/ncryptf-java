@@ -14,11 +14,9 @@ jdk:
   - openjdk-ea
   - oraclejdk8
   - oraclejdk9
-  - oraclejdk10
   - oraclejdk11
 
 matrix:
   fast_finish: true
   allow_failures:
-    - jdk: oraclejdk10
     - jdk: oraclejdk11
