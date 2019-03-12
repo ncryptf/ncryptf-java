@@ -87,7 +87,7 @@ public class RequestResponseTest
                 this.signatureKeyPairSecret
             );
 
-            byte[] cipher = request.encrypt("", this.serverKeyPairPublic, 2, this.nonce);
+            byte[] cipher = request.encrypt("", this.serverKeyPairPublic);
 
             Response response = new Response(
                 serverKeyPairSecret
