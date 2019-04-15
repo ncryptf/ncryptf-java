@@ -222,7 +222,7 @@ final public class Request
                 signature,
                 null,
                 message,
-                (long)message.length,
+                (int)message.length,
                 this.signatureSecretKey
             );
 
